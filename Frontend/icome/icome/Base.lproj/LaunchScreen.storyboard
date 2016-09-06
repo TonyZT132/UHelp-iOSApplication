@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="9532" systemVersion="15D21" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" initialViewController="01J-lp-oVM">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9530"/>
+        <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="EHf-IW-A2E">
+            <objects>
+                <viewController id="01J-lp-oVM" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="Llm-lL-Icb"/>
+                        <viewControllerLayoutGuide type="bottom" id="xb3-aO-Qok"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="Ze5-6b-2t3">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="start" translatesAutoresizingMaskIntoConstraints="NO" id="cvF-Ry-NWm">
+                                <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                            </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="友帮" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Dc1-q5-o9i">
+                                <rect key="frame" x="209" y="251" width="183" height="59"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="183" id="PYC-vE-WZ8"/>
+                                    <constraint firstAttribute="width" secondItem="Dc1-q5-o9i" secondAttribute="height" multiplier="183:59" id="zSr-u9-1dF"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="43"/>
+                                <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="分享你的价值" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="FSg-ce-K5C">
+                                <rect key="frame" x="184" y="318" width="233" height="30"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="233" id="8E0-7B-ZZS"/>
+                                    <constraint firstAttribute="width" secondItem="FSg-ce-K5C" secondAttribute="height" multiplier="233:30" id="VXi-YD-NNQ"/>
+                                    <constraint firstAttribute="height" constant="30" id="oBO-8w-d7y"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <constraints>
+                            <constraint firstItem="cvF-Ry-NWm" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leading" id="1Ri-bm-23X"/>
+                            <constraint firstItem="cvF-Ry-NWm" firstAttribute="bottom" secondItem="xb3-aO-Qok" secondAttribute="top" id="ES8-pi-VoK"/>
+                            <constraint firstItem="Dc1-q5-o9i" firstAttribute="top" secondItem="Llm-lL-Icb" secondAttribute="bottom" constant="231" id="Lyt-pz-9VD"/>
+                            <constraint firstItem="FSg-ce-K5C" firstAttribute="centerX" secondItem="cvF-Ry-NWm" secondAttribute="centerX" id="YQS-M1-9GQ"/>
+                            <constraint firstItem="FSg-ce-K5C" firstAttribute="centerX" secondItem="Dc1-q5-o9i" secondAttribute="centerX" id="YWV-Oo-2ap"/>
+                            <constraint firstItem="cvF-Ry-NWm" firstAttribute="top" secondItem="Ze5-6b-2t3" secondAttribute="top" id="aOV-zu-eU4"/>
+                            <constraint firstItem="FSg-ce-K5C" firstAttribute="top" secondItem="Dc1-q5-o9i" secondAttribute="bottom" constant="8" symbolic="YES" id="eC6-pB-6G2"/>
+                            <constraint firstAttribute="trailing" secondItem="cvF-Ry-NWm" secondAttribute="trailing" id="kNU-GR-dIY"/>
+                        </constraints>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="iYj-Kq-Ea1" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="53" y="375"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="start" width="408" height="708"/>
+    </resources>
+</document>
