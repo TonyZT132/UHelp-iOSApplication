@@ -154,67 +154,6 @@ class PersonalInfoViewController: UIViewController, UITableViewDataSource,UITabl
         }catch let error as NSError {
             NSLog("Could not fetch \(error), \(error.userInfo)")
         }
-        
-        
-//        var Dict = [String:AnyObject]()
-//        
-//        Dict["From"] = PersonalInfoData.valueForKey("From")
-//        Dict["Content"] = PersonalInfoData.valueForKey("Content")
-//        Dict["Date"] = PersonalInfoData.valueForKey("Date")
-//        Dict["Read"] = true
-//        Dict["Link"] = PersonalInfoData.valueForKey("Link")
-//        Dict["Target"] = PersonalInfoData.valueForKey("Target")
-//        
-//        let NSDict = Dict as NSDictionary
-//        self.InfoData[indexPath.row] = NSDict
-//        
-//        /*Update CoreData*/
-//        //self.UpdatePersonalInfo()
-//        
-//        self.TableView.reloadData()
-//        
-//        SVProgressHUD.setDefaultMaskType(SVProgressHUDMaskType.Black)
-//        SVProgressHUD.show()
-//        
-//        /*Query from Parse class*/
-//        let loadData = PFQuery(className:DataClass)
-//        loadData.whereKey("objectId", equalTo:(PersonalInfoData.valueForKey("Link") as! String))
-//        loadData.findObjectsInBackgroundWithBlock {
-//            (objects: [PFObject]?, error: NSError?) -> Void in
-//            
-//            if error == nil {
-//                let temp = NSMutableArray()
-//                for obj:AnyObject in objects!{
-//                    temp.addObject(obj)
-//                }
-//                
-//                /*Check whether the selected post is still exist*/
-//                if(temp.count > 0){
-//                    /*Direct to detail page*/
-//                    SVProgressHUD.dismiss()
-//                    let detail : DetailViewController = self.storyboard?.instantiateViewControllerWithIdentifier("detail") as! DetailViewController
-//                    //let user = home_obj[indexPath.row].objectForKey("user") as! PFUser
-//                    
-//                    detail.objectId_detail = PersonalInfoData.valueForKey("Link") as! String
-//                    detail.hidesBottomBarWhenPushed = true
-//                    self.navigationController!.navigationBar.tintColor = UIColor.whiteColor()
-//                    self.navigationController?.pushViewController(detail, animated: true)
-//                }else{
-//                    
-//                    /*The post has been deleted*/
-//                    self.presentViewController(show_alert_one_button(ERROR_ALERT, message: "该发布已被删除，请重新刷新", actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
-//                    SVProgressHUD.dismiss()
-//                }
-//                
-//            } else {
-//                /*Loading error*/
-//                NSLog("详情页面载入失败")
-//                NSLog("Error: \(error!) \(error!.userInfo)")
-//                self.presentViewController(show_alert_one_button(ERROR_ALERT, message: "页面载入失败", actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
-//                SVProgressHUD.dismiss()
-//            }
-//        }
-
     }
     
     
@@ -239,22 +178,6 @@ class PersonalInfoViewController: UIViewController, UITableViewDataSource,UITabl
                 managedContext.deleteObject(messageArr[indexPath.row] as! NSManagedObject)
                 do {
                     try managedContext.save()
-                    
-//                    let fetchRequest = NSFetchRequest(entityName: "PersonalMessage")
-//                    let sortDescriptor = NSSortDescriptor(key: "date", ascending: false)
-//                    let sortDescriptors = [sortDescriptor]
-//                    fetchRequest.sortDescriptors = sortDescriptors
-//                    do {
-//                        self.InfoData = try managedContext.executeFetchRequest(fetchRequest)
-//                    
-//                    } catch let error as NSError {
-//                        NSLog("Could not fetch \(error), \(error.userInfo)")
-//                        self.presentViewController(show_alert_one_button(ERROR_ALERT, message: "读取失败", actionButton: ERROR_ALERT_ACTION), animated: true, completion:
-//                            {
-//                                self.navigationController?.popViewControllerAnimated(true)
-//                        })
-//                    }
-                    
                 } catch let error as NSError  {
                     print("Could not save \(error), \(error.userInfo)")
                 }
@@ -270,49 +193,4 @@ class PersonalInfoViewController: UIViewController, UITableViewDataSource,UITabl
         
         return [deleteAction]
     }
-    
-//    func UpdatePersonalInfo(){
-//        /*Query from Parse class*/
-//        let query = PFQuery(className:"personal_info_table")
-//        query.whereKey("TargetId", equalTo: (PFUser.currentUser()?.objectId)!)
-//        query.findObjectsInBackgroundWithBlock {
-//            (objects: [PFObject]?, error: NSError?) -> Void in
-//            
-//            if(error == nil){
-//                let temp = NSMutableArray()
-//                for obj:AnyObject in objects!{
-//                    temp.addObject(obj)
-//                }
-//                
-//                if(temp.count > 0){
-//                    query.getObjectInBackgroundWithId((temp.firstObject!.objectId)!!){
-//                        (record: PFObject?, error: NSError?) -> Void in
-//                        
-//                        if error != nil {
-//                            /*Do Reset*/
-//                            NSLog(error.debugDescription)
-//                            
-//                        } else if let record = record {
-//                            record["personal_info"] = self.InfoData
-//                            record.saveInBackground()
-//                        }
-//                    }
-//                }
-//            }else{
-//                /*Do Reset*/
-//                NSLog(error.debugDescription)
-//            }
-//        }
-//    }
-    
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
 }
