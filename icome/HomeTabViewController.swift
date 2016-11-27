@@ -21,23 +21,23 @@ class HomeTabViewController: CYLTabBarController {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         
         /*Set up View Controllers*/
-        let home : HomeNaviViewController = storyboard.instantiateViewControllerWithIdentifier(HOME_NAV) as! HomeNaviViewController
-        let map : MapNavViewController = storyboard.instantiateViewControllerWithIdentifier("map_nav") as! MapNavViewController
-        let message : MessageNavViewController = storyboard.instantiateViewControllerWithIdentifier("message_nav") as! MessageNavViewController
-        let setting : SettingNavViewController = storyboard.instantiateViewControllerWithIdentifier("setting_nav") as! SettingNavViewController
+        let home : HomeNaviViewController = storyboard.instantiateViewController(withIdentifier: HOME_NAV) as! HomeNaviViewController
+        let map : MapNavViewController = storyboard.instantiateViewController(withIdentifier: "map_nav") as! MapNavViewController
+        let message : MessageNavViewController = storyboard.instantiateViewController(withIdentifier: "message_nav") as! MessageNavViewController
+        let setting : SettingNavViewController = storyboard.instantiateViewController(withIdentifier: "setting_nav") as! SettingNavViewController
         
         /*Create Tab Bar Items Array*/
         var tabBarItemsAttributes: [AnyObject] = []
         let viewControllers:[AnyObject] = [home,map,message,setting]
         
         for i in 0 ... tabTitle.count - 1 {
-            let dict: [NSObject : AnyObject] = [
+            let dict: [AnyHashable: Any] = [
                 CYLTabBarItemTitle: tabTitle[i],
                 CYLTabBarItemImage: image[i],
                 CYLTabBarItemSelectedImage: selectedImage[i]
             ]
             
-            tabBarItemsAttributes.append(dict)
+            tabBarItemsAttributes.append(dict as AnyObject)
         }
         self.tabBarItemsAttributes = tabBarItemsAttributes
         self.viewControllers = viewControllers

@@ -29,7 +29,7 @@ class MapPageViewController: UIViewController, MKMapViewDelegate,CLLocationManag
         
         /*Check whether the variables have been passed in*/
         if(longitude == 0.0 && latitude == 0.0){
-            self.presentViewController(show_alert_one_button(ERROR_ALERT, message: "获取地理位置信息失败，请稍后重试", actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
+            self.present(show_alert_one_button(ERROR_ALERT, message: "获取地理位置信息失败，请稍后重试", actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
         }else{
             /*Set up Region*/
             setRegion()
@@ -38,7 +38,7 @@ class MapPageViewController: UIViewController, MKMapViewDelegate,CLLocationManag
         }
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         
         /*Setup the navigation bar*/
         navigationItem.title = "附近的人"
@@ -54,8 +54,8 @@ class MapPageViewController: UIViewController, MKMapViewDelegate,CLLocationManag
         
         let loadData = PFQuery(className:dataClass)
         loadData.includeKey("user")
-        loadData.orderByDescending("createdAt")
-        loadData.findObjectsInBackgroundWithBlock {
+        loadData.order(byDescending: "createdAt")
+        loadData.findObjectsInBackground {
             (objects: [PFObject]?, error: NSError?) -> Void in
             
             if error == nil {
@@ -63,7 +63,7 @@ class MapPageViewController: UIViewController, MKMapViewDelegate,CLLocationManag
                 print("Successfully retrieved \(objects!.count) scores.")
                 // Do something with the found objects
                 for obj:AnyObject in objects!{
-                    self.map_obj.addObject(obj)
+                    self.map_obj.add(obj)
                 }
                 
                 self.updateMap()
@@ -83,30 +83,30 @@ class MapPageViewController: UIViewController, MKMapViewDelegate,CLLocationManag
     /*Update map annotations*/
     func updateMap(){
         for obj in map_obj {
-            if(obj.objectForKey("location") != nil){
+            if((obj as AnyObject).object(forKey: "location") != nil){
                 
-                let user = obj.objectForKey("user") as! PFUser
-                let ImageFile = user.objectForKey("featured_image")  as! PFFile
-                ImageFile.getDataInBackgroundWithBlock {
-                    (imageData: NSData?, error: NSError?) -> Void in
+                let user = (obj as AnyObject).object(forKey: "user") as! PFUser
+                let ImageFile = user.object(forKey: "featured_image")  as! PFFile
+                ImageFile.getDataInBackground {
+                    (imageData: Data?, error: NSError?) -> Void in
                     if error == nil {
                         if let imageData = imageData {
                             let temp_annotation = JPSThumbnail()
                             
                             temp_annotation.image = UIImage(data:imageData)
-                            temp_annotation.title = obj.objectForKey("title") as! String
-                            temp_annotation.subtitle = obj.objectForKey("description") as! String
+                            temp_annotation.title = obj.object(forKey: "title") as! String
+                            temp_annotation.subtitle = obj.object(forKey: "description") as! String
                             
-                            let point = obj.objectForKey("location") as! PFGeoPoint
+                            let point = obj.object(forKey: "location") as! PFGeoPoint
                             temp_annotation.coordinate = CLLocationCoordinate2DMake(point.latitude, point.longitude)
                             temp_annotation.disclosureBlock = {
           
                                 //direct to detail page
-                                let detail : DetailViewController = self.storyboard?.instantiateViewControllerWithIdentifier("detail") as! DetailViewController
+                                let detail : DetailViewController = self.storyboard?.instantiateViewController(withIdentifier: "detail") as! DetailViewController
                                 detail.objectId_detail = obj.objectId as String!
-                                detail.selected_nick_name = (user.objectForKey("nick_name") as? String)!
+                                detail.selected_nick_name = (user.object(forKey: "nick_name") as? String)!
                                 detail.hidesBottomBarWhenPushed = true
-                                self.navigationController!.navigationBar.tintColor = UIColor.whiteColor()
+                                self.navigationController!.navigationBar.tintColor = UIColor.white
                                 self.navigationController?.pushViewController(detail, animated: true)
                             }
                             self.mapView.addAnnotation(JPSThumbnailAnnotation(thumbnail: temp_annotation))
@@ -123,16 +123,16 @@ class MapPageViewController: UIViewController, MKMapViewDelegate,CLLocationManag
 
     // MARK: MKMapViewDelegate
     
-    func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
-        (view as? JPSThumbnailAnnotationViewProtocol)?.didSelectAnnotationViewInMap(mapView)
+    func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+        (view as? JPSThumbnailAnnotationViewProtocol)?.didSelectAnnotationView(inMap: mapView)
     }
     
-    func mapView(mapView: MKMapView, didDeselectAnnotationView view: MKAnnotationView) {
-        (view as? JPSThumbnailAnnotationViewProtocol)?.didDeselectAnnotationViewInMap(mapView)
+    func mapView(_ mapView: MKMapView, didDeselect view: MKAnnotationView) {
+        (view as? JPSThumbnailAnnotationViewProtocol)?.didDeselectAnnotationView(inMap: mapView)
     }
     
-    func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
-        return (annotation as? JPSThumbnailAnnotationProtocol)?.annotationViewInMap(mapView)
+    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+        return (annotation as? JPSThumbnailAnnotationProtocol)?.annotationView(inMap: mapView)
     }
 
 }

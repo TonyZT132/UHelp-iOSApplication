@@ -23,7 +23,7 @@ class ContentViewController: UIViewController {
         startPage.layer.cornerRadius = startPage.frame.height / 2
         
         if(pageIndex < 2){
-            startPage.hidden = true
+            startPage.isHidden = true
         }
         self.pageImage.image = UIImage(named: imageName)
         
@@ -35,16 +35,16 @@ class ContentViewController: UIViewController {
     }
     
     /*When user click start button*/
-    @IBAction func start(sender: AnyObject) {
-        if(PFUser.currentUser() != nil){
-            let appDelegate = UIApplication.sharedApplication().delegate as? AppDelegate
+    @IBAction func start(_ sender: AnyObject) {
+        if(PFUser.current() != nil){
+            let appDelegate = UIApplication.shared.delegate as? AppDelegate
             appDelegate?.get_token()
             
             let home = HomeTabViewController()
-            self.presentViewController(home, animated: true, completion: nil)
+            self.present(home, animated: true, completion: nil)
         }else{
-            let start : StartingPageViewController = self.storyboard?.instantiateViewControllerWithIdentifier("starting_page") as! StartingPageViewController
-            self.presentViewController(start, animated: true, completion: nil)
+            let start : StartingPageViewController = self.storyboard?.instantiateViewController(withIdentifier: "starting_page") as! StartingPageViewController
+            self.present(start, animated: true, completion: nil)
         }
     }
 }

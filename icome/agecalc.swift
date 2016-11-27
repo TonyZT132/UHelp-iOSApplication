@@ -8,10 +8,10 @@
 
 import Foundation
 
-func age_calc(birthday:NSDate) -> NSInteger{
-    let gregorian = NSCalendar(calendarIdentifier: NSCalendarIdentifierGregorian)
-    let now = NSDate()
-    let components = gregorian?.components(NSCalendarUnit.Year, fromDate:birthday, toDate: now, options: NSCalendarOptions(rawValue: 0))
+func age_calc(_ birthday:Date) -> NSInteger{
+    let gregorian = Calendar(identifier: Calendar.Identifier.gregorian)
+    let now = Date()
+    let components = (gregorian as NSCalendar?)?.components(NSCalendar.Unit.year, from:birthday, to: now, options: NSCalendar.Options(rawValue: 0))
     let age = components?.year
     print(age)
     return age!

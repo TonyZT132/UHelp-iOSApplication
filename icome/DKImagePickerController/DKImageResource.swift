@@ -8,20 +8,20 @@
 
 import UIKit
 
-private extension NSBundle {
+private extension Bundle {
     
-    class func imagePickerControllerBundle() -> NSBundle {
-        let assetPath = NSBundle(forClass: DKImageResource.self).resourcePath!
-        return NSBundle(path: (assetPath as NSString).stringByAppendingPathComponent("DKImagePickerController.bundle"))!
+    class func imagePickerControllerBundle() -> Bundle {
+        let assetPath = Bundle(for: DKImageResource.self).resourcePath!
+        return Bundle(path: (assetPath as NSString).appendingPathComponent("DKImagePickerController.bundle"))!
     }
     
 }
 
 internal class DKImageResource {
 
-    private class func imageForResource(name: String) -> UIImage {
-        let bundle = NSBundle.imagePickerControllerBundle()
-        let imagePath = bundle.pathForResource(name, ofType: "png", inDirectory: "Images")
+    fileprivate class func imageForResource(_ name: String) -> UIImage {
+        let bundle = Bundle.imagePickerControllerBundle()
+        let imagePath = bundle.path(forResource: name, ofType: "png", inDirectory: "Images")
         let image = UIImage(contentsOfFile: imagePath!)
         return image!
     }
@@ -29,7 +29,7 @@ internal class DKImageResource {
     class func checkedImage() -> UIImage {
         var image = imageForResource("checked_background")
         let center = image.size.width / 2
-        image = image.resizableImageWithCapInsets(UIEdgeInsets(top: center, left: center, bottom: center, right: center))
+        image = image.resizableImage(withCapInsets: UIEdgeInsets(top: center, left: center, bottom: center, right: center))
         
         return image
     }
@@ -50,13 +50,13 @@ internal class DKImageResource {
 
 internal class DKImageLocalizedString {
     
-    class func localizedStringForKey(key: String) -> String {
-        return NSLocalizedString(key, tableName: "DKImagePickerController", bundle:NSBundle.imagePickerControllerBundle(), value: "", comment: "")
+    class func localizedStringForKey(_ key: String) -> String {
+        return NSLocalizedString(key, tableName: "DKImagePickerController", bundle:Bundle.imagePickerControllerBundle(), value: "", comment: "")
     }
     
 }
 
-internal func DKImageLocalizedStringWithKey(key: String) -> String {
+internal func DKImageLocalizedStringWithKey(_ key: String) -> String {
     return DKImageLocalizedString.localizedStringForKey(key)
 }
 

@@ -22,15 +22,15 @@ class AboutViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationItem.title = "关于友帮"
-        navigationController?.navigationBar.titleTextAttributes = [NSForegroundColorAttributeName: UIColor.whiteColor()]
+        navigationController?.navigationBar.titleTextAttributes = [NSForegroundColorAttributeName: UIColor.white]
     }
     
-    @IBAction func back(sender: AnyObject) {
-        let setting : SettingNavViewController = self.storyboard?.instantiateViewControllerWithIdentifier(SETTING_NAV) as! SettingNavViewController
-        self.presentViewController(setting, animated: true, completion: nil)
+    @IBAction func back(_ sender: AnyObject) {
+        let setting : SettingNavViewController = self.storyboard?.instantiateViewController(withIdentifier: SETTING_NAV) as! SettingNavViewController
+        self.present(setting, animated: true, completion: nil)
     }
 
 }

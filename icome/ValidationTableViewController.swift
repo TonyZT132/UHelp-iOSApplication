@@ -19,7 +19,7 @@ class ValidationTableViewController: UITableViewController, UITextFieldDelegate 
     @IBOutlet weak var get_validation_code_button: UIButton!
     
     var time_count = 40
-    var timer = NSTimer()
+    var timer = Timer()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -31,21 +31,21 @@ class ValidationTableViewController: UITableViewController, UITextFieldDelegate 
         /*Initalize the layout*/
         activation_code_text.delegate = self
         phone_num.delegate = self
-        counting_label.hidden = true
+        counting_label.isHidden = true
         
-        phone_num.keyboardType = UIKeyboardType.PhonePad
-        validation_code.keyboardType = UIKeyboardType.PhonePad
+        phone_num.keyboardType = UIKeyboardType.phonePad
+        validation_code.keyboardType = UIKeyboardType.phonePad
         get_validation_code_button.layer.borderWidth = 1
-        get_validation_code_button.layer.borderColor = UIColor(red: 248.0/255.0, green: 143.0/255.0, blue: 51.0/255.0, alpha:1.0).CGColor
+        get_validation_code_button.layer.borderColor = UIColor(red: 248.0/255.0, green: 143.0/255.0, blue: 51.0/255.0, alpha:1.0).cgColor
         get_validation_code_button.layer.cornerRadius = 5
         
         submit_button.layer.borderWidth = 1
-        submit_button.layer.borderColor = UIColor(red: 248.0/255.0, green: 143.0/255.0, blue: 51.0/255.0, alpha:1.0).CGColor
+        submit_button.layer.borderColor = UIColor(red: 248.0/255.0, green: 143.0/255.0, blue: 51.0/255.0, alpha:1.0).cgColor
         submit_button.layer.cornerRadius = submit_button.frame.height / 2
         submit_button.clipsToBounds = true
         
         counting_label.layer.borderWidth = 1
-        counting_label.layer.borderColor = UIColor(red: 248.0/255.0, green: 143.0/255.0, blue: 51.0/255.0, alpha:1.0).CGColor
+        counting_label.layer.borderColor = UIColor(red: 248.0/255.0, green: 143.0/255.0, blue: 51.0/255.0, alpha:1.0).cgColor
         counting_label.layer.cornerRadius = 5
     }
 
@@ -55,15 +55,15 @@ class ValidationTableViewController: UITableViewController, UITextFieldDelegate 
     }
     
     /*When user start editing, reset the button*/
-    func textFieldDidBeginEditing(textField: UITextField) {
-        get_validation_code_button.setTitle("获取验证码", forState:.Normal)
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        get_validation_code_button.setTitle("获取验证码", for:UIControlState())
     }
     
     /*Initial the navigation bar*/
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationItem.title = "注册"
-        get_validation_code_button.setTitle("获取验证码", forState:.Normal)
+        get_validation_code_button.setTitle("获取验证码", for:UIControlState())
     }
     
     /*Hide keyboard when user finish editing*/
@@ -73,12 +73,12 @@ class ValidationTableViewController: UITableViewController, UITextFieldDelegate 
 
     // MARK: - Table view data source
 
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    override func numberOfSections(in tableView: UITableView) -> Int {
         // #warning Incomplete implementation, return the number of sections
         return 2
     }
 
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
         switch section {
             case 0: return 2
@@ -87,15 +87,15 @@ class ValidationTableViewController: UITableViewController, UITextFieldDelegate 
         }
     }
 
-    @IBAction func get_validation_code(sender: AnyObject) {
+    @IBAction func get_validation_code(_ sender: AnyObject) {
         
-        self.get_validation_code_button.setTitle("获取中", forState:.Normal)
-        self.get_validation_code_button.enabled = false
+        self.get_validation_code_button.setTitle("获取中", for:UIControlState())
+        self.get_validation_code_button.isEnabled = false
         
         /*Check phone number input*/
         if(self.phone_num.text == nil || self.phone_num.text! == ""){
-            self.get_validation_code_button.setTitle(ERROR_EMPTY_PHONENUMBER, forState:.Normal)
-            self.get_validation_code_button.enabled = true
+            self.get_validation_code_button.setTitle(ERROR_EMPTY_PHONENUMBER, for:UIControlState())
+            self.get_validation_code_button.isEnabled = true
             return
         }
         
@@ -104,29 +104,29 @@ class ValidationTableViewController: UITableViewController, UITextFieldDelegate 
         let matcher = MyRegex(Pattern)
         if (matcher.match(phone_num.text!) == false) {
             /*Incorrect cell phone number*/
-            self.get_validation_code_button.setTitle(ERROR_WRONG_TYPE_CELL_PHONE, forState:.Normal)
-            self.get_validation_code_button.enabled = true
+            self.get_validation_code_button.setTitle(ERROR_WRONG_TYPE_CELL_PHONE, for:UIControlState())
+            self.get_validation_code_button.isEnabled = true
         } else {
             
             /*Request validation code*/
-            PFCloud.callFunctionInBackground("sendCode", withParameters: ["number":self.phone_num.text!]) {
+            PFCloud.callFunction(inBackground: "sendCode", withParameters: ["number":self.phone_num.text!]) {
                 (response: AnyObject?, error: NSError?) -> Void in
                 /*Request Success*/
                 if(error == nil){
                     /*Get the code*/
-                    self.presentViewController(show_alert_one_button("获取成功", message: "验证码短信发送成功", actionButton: "好的"), animated: true, completion: nil)
+                    self.present(show_alert_one_button("获取成功", message: "验证码短信发送成功", actionButton: "好的"), animated: true, completion: nil)
                     self.initial_timer()
                 }
                 else{
-                    self.get_validation_code_button.setTitle(error?.localizedDescription, forState:.Normal)
-                    self.get_validation_code_button.enabled = true
+                    self.get_validation_code_button.setTitle(error?.localizedDescription, for:UIControlState())
+                    self.get_validation_code_button.isEnabled = true
                 }
             }
         }
     }
 
     /*After user get the code, do the validation*/
-    @IBAction func submit(sender: AnyObject) {
+    @IBAction func submit(_ sender: AnyObject) {
         
         /*Check activation code input*/
         if(activation_code_text.text != nil && activation_code_text.text! != ""){
@@ -137,13 +137,13 @@ class ValidationTableViewController: UITableViewController, UITextFieldDelegate 
             
             /*check the length*/
             if(num_p < 8){
-                self.presentViewController(show_alert_one_button(ERROR_ALERT, message: "邀请码错误", actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
+                self.present(show_alert_one_button(ERROR_ALERT, message: "邀请码错误", actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
                 return
             }
             
             /*Check Activation code if user input it*/
-            let params = ["activationcode": activation_code_text.text!] as [NSObject:AnyObject]
-            PFCloud.callFunctionInBackground("ActivationCodeValidation", withParameters: params) {
+            let params = ["activationcode": activation_code_text.text!] as [AnyHashable: Any]
+            PFCloud.callFunction(inBackground: "ActivationCodeValidation", withParameters: params) {
                 (response: AnyObject?, error: NSError?) -> Void in
                 if(error == nil){
                     let isValid  = response as! Bool
@@ -152,12 +152,12 @@ class ValidationTableViewController: UITableViewController, UITextFieldDelegate 
                         
                         /*Check phone number input*/
                         if(self.phone_num.text == nil || self.phone_num.text! == ""){
-                            self.presentViewController(show_alert_one_button(ERROR_ALERT, message: ERROR_EMPTY_PHONENUMBER, actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
+                            self.present(show_alert_one_button(ERROR_ALERT, message: ERROR_EMPTY_PHONENUMBER, actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
                             return
                         }
                         
                         if(self.validation_code.text == nil || self.validation_code.text! == ""){
-                            self.presentViewController(show_alert_one_button(ERROR_ALERT, message: "验证码不能为空", actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
+                            self.present(show_alert_one_button(ERROR_ALERT, message: "验证码不能为空", actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
                             return
                         }
                         
@@ -168,12 +168,12 @@ class ValidationTableViewController: UITableViewController, UITextFieldDelegate 
                         if(num == 4){
                             
                             /*Enable loading screen*/
-                            SVProgressHUD.setDefaultMaskType(SVProgressHUDMaskType.Black)
+                            SVProgressHUD.setDefaultMaskType(SVProgressHUDMaskType.black)
                             SVProgressHUD.show()
                             
                             /*Call validation function on Parse Cloud Code*/
-                            let params = ["number": self.phone_num.text!, "code": self.validation_code.text!] as [NSObject:AnyObject]
-                            PFCloud.callFunctionInBackground("codeValidation", withParameters: params) {
+                            let params = ["number": self.phone_num.text!, "code": self.validation_code.text!] as [AnyHashable: Any]
+                            PFCloud.callFunction(inBackground: "codeValidation", withParameters: params) {
                                 (response: AnyObject?, error: NSError?) -> Void in
                                 if(error == nil){
                                     let isValid = response as! Bool
@@ -181,19 +181,19 @@ class ValidationTableViewController: UITableViewController, UITextFieldDelegate 
                                         
                                         /*Validation successful, go to signup page*/
                                         phoneStringFinal = self.phone_num.text!
-                                        let sign_up : SignUpViewController = self.storyboard?.instantiateViewControllerWithIdentifier(SIGN_UP_PROFILE) as! SignUpViewController
+                                        let sign_up : SignUpViewController = self.storyboard?.instantiateViewController(withIdentifier: SIGN_UP_PROFILE) as! SignUpViewController
                                         
                                         /*disable loading screen*/
                                         SVProgressHUD.dismiss()
-                                        self.presentViewController(sign_up, animated: true, completion: nil)
+                                        self.present(sign_up, animated: true, completion: nil)
                                     }else{
-                                        self.presentViewController(show_alert_one_button(ERROR_ALERT, message: ERROR_VALIDATION_FAIL, actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
+                                        self.present(show_alert_one_button(ERROR_ALERT, message: ERROR_VALIDATION_FAIL, actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
                                         
                                         /*disable loading screen*/
                                         SVProgressHUD.dismiss()
                                     }
                                 }else{
-                                    self.presentViewController(show_alert_one_button(ERROR_ALERT, message: error?.localizedDescription, actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
+                                    self.present(show_alert_one_button(ERROR_ALERT, message: error?.localizedDescription, actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
                                     
                                     /*disable loading screen*/
                                     SVProgressHUD.dismiss()
@@ -201,20 +201,20 @@ class ValidationTableViewController: UITableViewController, UITextFieldDelegate 
                             }
                         }
                         else{
-                            self.presentViewController(show_alert_one_button(ERROR_ALERT, message: ERROR_WRONG_TYPE_VALIDATION_CODE, actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
+                            self.present(show_alert_one_button(ERROR_ALERT, message: ERROR_WRONG_TYPE_VALIDATION_CODE, actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
                             SVProgressHUD.dismiss()
                             return
                         }
 
                     }else{
                         /*Incorrect Activation Code*/
-                        self.presentViewController(show_alert_one_button(ERROR_ALERT, message: ERROR_WRONG_TYPE_VALIDATION_CODE, actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
+                        self.present(show_alert_one_button(ERROR_ALERT, message: ERROR_WRONG_TYPE_VALIDATION_CODE, actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
                         SVProgressHUD.dismiss()
                     }
                 }else{
                     
                     /*Request Failed*/
-                    self.presentViewController(show_alert_one_button(ERROR_ALERT, message: error?.localizedDescription, actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
+                    self.present(show_alert_one_button(ERROR_ALERT, message: error?.localizedDescription, actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
                     SVProgressHUD.dismiss()
                 }
             }
@@ -223,12 +223,12 @@ class ValidationTableViewController: UITableViewController, UITextFieldDelegate 
             //User decide not to inout activation code
             /*Check phone number input*/
             if(phone_num.text == nil || phone_num.text! == ""){
-                self.presentViewController(show_alert_one_button(ERROR_ALERT, message: ERROR_EMPTY_PHONENUMBER, actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
+                self.present(show_alert_one_button(ERROR_ALERT, message: ERROR_EMPTY_PHONENUMBER, actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
                 return
             }
             
             if(validation_code.text == nil || validation_code.text! == ""){
-                self.presentViewController(show_alert_one_button(ERROR_ALERT, message: "验证码不能为空", actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
+                self.present(show_alert_one_button(ERROR_ALERT, message: "验证码不能为空", actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
                 return
             }
             
@@ -239,12 +239,12 @@ class ValidationTableViewController: UITableViewController, UITextFieldDelegate 
             if(num == 4){
                 
                 /*Enable loading screen*/
-                SVProgressHUD.setDefaultMaskType(SVProgressHUDMaskType.Black)
+                SVProgressHUD.setDefaultMaskType(SVProgressHUDMaskType.black)
                 SVProgressHUD.show()
                 
                 /*Call validation function on Parse Cloud Code*/
-                let params = ["number": phone_num.text!, "code": validation_code.text!] as [NSObject:AnyObject]
-                PFCloud.callFunctionInBackground("codeValidation", withParameters: params) {
+                let params = ["number": phone_num.text!, "code": validation_code.text!] as [AnyHashable: Any]
+                PFCloud.callFunction(inBackground: "codeValidation", withParameters: params) {
                     (response: AnyObject?, error: NSError?) -> Void in
                     if(error == nil){
                         let isValid = response as! Bool
@@ -252,19 +252,19 @@ class ValidationTableViewController: UITableViewController, UITextFieldDelegate 
                             
                             /*Validation success, go to sign up page*/
                             phoneStringFinal = self.phone_num.text!
-                            let sign_up : SignUpViewController = self.storyboard?.instantiateViewControllerWithIdentifier(SIGN_UP_PROFILE) as! SignUpViewController
+                            let sign_up : SignUpViewController = self.storyboard?.instantiateViewController(withIdentifier: SIGN_UP_PROFILE) as! SignUpViewController
                             
                             /*disable loading screen*/
                             SVProgressHUD.dismiss()
-                            self.presentViewController(sign_up, animated: true, completion: nil)
+                            self.present(sign_up, animated: true, completion: nil)
                         }else{
-                            self.presentViewController(show_alert_one_button(ERROR_ALERT, message: ERROR_VALIDATION_FAIL, actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
+                            self.present(show_alert_one_button(ERROR_ALERT, message: ERROR_VALIDATION_FAIL, actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
                             
                             /*disable loading screen*/
                             SVProgressHUD.dismiss()
                         }
                     }else{
-                        self.presentViewController(show_alert_one_button(ERROR_ALERT, message: error?.localizedDescription, actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
+                        self.present(show_alert_one_button(ERROR_ALERT, message: error?.localizedDescription, actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
                         /*disable loading screen*/
                         SVProgressHUD.dismiss()
                     }
@@ -272,7 +272,7 @@ class ValidationTableViewController: UITableViewController, UITextFieldDelegate 
             }
             else{
                 
-                self.presentViewController(show_alert_one_button(ERROR_ALERT, message: ERROR_WRONG_TYPE_VALIDATION_CODE, actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
+                self.present(show_alert_one_button(ERROR_ALERT, message: ERROR_WRONG_TYPE_VALIDATION_CODE, actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
                 SVProgressHUD.dismiss()
                 return
             }
@@ -283,30 +283,30 @@ class ValidationTableViewController: UITableViewController, UITextFieldDelegate 
     
     /*Initial the timer*/
     func initial_timer(){
-        counting_label.hidden = false
-        get_validation_code_button.hidden = true
-        timer = NSTimer.scheduledTimerWithTimeInterval(1, target: self, selector: #selector(ValidationTableViewController.counting), userInfo: nil, repeats: true)
+        counting_label.isHidden = false
+        get_validation_code_button.isHidden = true
+        timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(ValidationTableViewController.counting), userInfo: nil, repeats: true)
     }
     
     /*enable the timer*/
     func counting(){
         time_count = time_count - 1
-        self.get_validation_code_button.setTitle("请在\(time_count)秒之后重试", forState:.Normal)
+        self.get_validation_code_button.setTitle("请在\(time_count)秒之后重试", for:UIControlState())
         counting_label.text = "请在\(time_count)秒之后重试"
         
         /*If counter reached 0, show the button again*/
         if(time_count == 0){
             timer.invalidate()
             time_count = 40
-            self.get_validation_code_button.setTitle("获取验证码", forState:.Normal)
-            self.get_validation_code_button.enabled = true
-            counting_label.hidden = true
-            get_validation_code_button.hidden = false
+            self.get_validation_code_button.setTitle("获取验证码", for:UIControlState())
+            self.get_validation_code_button.isEnabled = true
+            counting_label.isHidden = true
+            get_validation_code_button.isHidden = false
         }
     }
     
-    @IBAction func back_to_start(sender: AnyObject) {
+    @IBAction func back_to_start(_ sender: AnyObject) {
         hideKeyboard() 
-        self.dismissViewControllerAnimated(true, completion: nil)
+        self.dismiss(animated: true, completion: nil)
     }
 }

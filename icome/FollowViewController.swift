@@ -21,7 +21,7 @@ class FollowViewController: UIViewController,UITableViewDataSource,UITableViewDe
     }
     
     func GetData() {
-        followArr = PFUser.currentUser()?.objectForKey("follow") as! Array
+        followArr = PFUser.current()?.object(forKey: "follow") as! Array
         TableView.dataSource = self
         TableView.delegate = self
         TableView.reloadData()
@@ -33,34 +33,34 @@ class FollowViewController: UIViewController,UITableViewDataSource,UITableViewDe
         // Dispose of any resources that can be recreated.
     }
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return followArr.count
     }
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell
     {
-        let cell:FollowTableViewCell = TableView.dequeueReusableCellWithIdentifier("follow", forIndexPath: indexPath) as! FollowTableViewCell
+        let cell:FollowTableViewCell = TableView.dequeueReusableCell(withIdentifier: "follow", for: indexPath) as! FollowTableViewCell
         cell.FeaturedImage.layer.cornerRadius = cell.FeaturedImage.frame.height / 2
         cell.FeaturedImage.clipsToBounds = true
         
         let loadData = PFQuery(className:"_User")
         loadData.whereKey("objectId", equalTo: followArr[indexPath.row])
-        loadData.findObjectsInBackgroundWithBlock {
+        loadData.findObjectsInBackground {
             (objects: [PFObject]?, error: NSError?) -> Void in
             
             if error == nil {
                 
                 let temp = NSMutableArray()
                 for obj:AnyObject in objects!{
-                    temp.addObject(obj)
+                    temp.add(obj)
                 }
                 
-                cell.Nickname.text = temp.firstObject?.objectForKey("nick_name") as? String
-                cell.City.text = temp.firstObject?.objectForKey("city") as? String
+                cell.Nickname.text = temp.firstObject?.object(forKey: "nick_name") as? String
+                cell.City.text = temp.firstObject?.object(forKey: "city") as? String
                 
                 //let user = self.detail_obj.firstObject?.objectForKey("user") as! PFUser
                 
-                let gender_temp =  temp.firstObject?.objectForKey("gender") as? String
+                let gender_temp =  temp.firstObject?.object(forKey: "gender") as? String
                 if(gender_temp != nil){
                     if (gender_temp == "M"){
                         cell.GenderImage.image = UIImage(named: "性别男")
@@ -74,9 +74,9 @@ class FollowViewController: UIViewController,UITableViewDataSource,UITableViewDe
                 }
                 
                 //load image
-                let userImageFile = temp.firstObject?.objectForKey("featured_image")  as! PFFile
-                userImageFile.getDataInBackgroundWithBlock {
-                    (imageData: NSData?, error: NSError?) -> Void in
+                let userImageFile = temp.firstObject?.object(forKey: "featured_image")  as! PFFile
+                userImageFile.getDataInBackground {
+                    (imageData: Data?, error: NSError?) -> Void in
                     if error == nil {
                         if let imageData = imageData {
                             cell.FeaturedImage.image = UIImage(data:imageData)
@@ -93,47 +93,47 @@ class FollowViewController: UIViewController,UITableViewDataSource,UITableViewDe
         return cell
     }
     
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-        SVProgressHUD.setDefaultMaskType(SVProgressHUDMaskType.Black)
+        SVProgressHUD.setDefaultMaskType(SVProgressHUDMaskType.black)
         SVProgressHUD.show()
         
         let loadData = PFQuery(className:"_User")
         loadData.whereKey("objectId", equalTo: followArr[indexPath.row])
-        loadData.findObjectsInBackgroundWithBlock {
+        loadData.findObjectsInBackground {
             (objects: [PFObject]?, error: NSError?) -> Void in
             
             if error == nil {
                 
                 let temp = NSMutableArray()
                 for obj:AnyObject in objects!{
-                    temp.addObject(obj)
+                    temp.add(obj)
                 }
                 
                 let user = temp.firstObject as! PFUser
                 
-                let profile : ProfileViewController = self.storyboard?.instantiateViewControllerWithIdentifier("profile") as! ProfileViewController
+                let profile : ProfileViewController = self.storyboard?.instantiateViewController(withIdentifier: "profile") as! ProfileViewController
                 
                 profile.hidesBottomBarWhenPushed = true
                 profile.SelectedUser = user
                 SVProgressHUD.dismiss()
-                self.navigationController!.navigationBar.tintColor = UIColor.whiteColor()
+                self.navigationController!.navigationBar.tintColor = UIColor.white
                 self.navigationController?.pushViewController(profile, animated: true)
             }
         }
     }
     
     
-    func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
         /*Leave it blank*/
     }
     
-    func tableView(tableView: UITableView, editActionsForRowAtIndexPath indexPath: NSIndexPath) -> [UITableViewRowAction]? {
-        let deleteAction  = UITableViewRowAction(style: .Default, title: "取消关注", handler: { (action: UITableViewRowAction!, indexPath: NSIndexPath!) -> Void in
+    func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
+        let deleteAction  = UITableViewRowAction(style: .default, title: "取消关注", handler: { (action: UITableViewRowAction!, indexPath: IndexPath!) -> Void in
             
-            self.followArr.removeAtIndex(indexPath.row)
+            self.followArr.remove(at: indexPath.row)
             self.updateFollower()
-            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
+            tableView.deleteRows(at: [indexPath], with: .fade)
         })
         
         return [deleteAction]
@@ -141,10 +141,10 @@ class FollowViewController: UIViewController,UITableViewDataSource,UITableViewDe
     
     func updateFollower(){
         /*Do update*/
-        if let currentUser = PFUser.currentUser(){
+        if let currentUser = PFUser.current(){
             currentUser["follow"] = followArr
             //currentUser.saveInBackground()
-            currentUser.saveInBackgroundWithBlock({ (success, error) -> Void in
+            currentUser.saveInBackground(block: { (success, error) -> Void in
                 if(error == nil){
                     NSLog("更新成功")
                 }else{
