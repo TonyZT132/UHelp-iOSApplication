@@ -23,8 +23,7 @@ class PersonalInfoViewController: UIViewController, UITableViewDataSource,UITabl
         TableView.delegate = self
         TableView.dataSource = self
         
-        let appDelegate =
-            UIApplication.sharedApplication().delegate as! AppDelegate
+        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
         let managedContext = appDelegate.managedObjectContext
         let fetchRequest = NSFetchRequest(entityName: "PersonalMessage")
         let sortDescriptor = NSSortDescriptor(key: "date", ascending: false)
@@ -165,10 +164,6 @@ class PersonalInfoViewController: UIViewController, UITableViewDataSource,UITabl
         let deleteAction  = UITableViewRowAction(style: .Default, title: "删除", handler: { (action: UITableViewRowAction!, indexPath: NSIndexPath!) -> Void in
             
             self.InfoData.removeAtIndex(indexPath.row)
-            
-            /*Update coreData*/
-            //self.UpdatePersonalInfo()
-            
             let appDelegate =
                 UIApplication.sharedApplication().delegate as! AppDelegate
             let managedContext = appDelegate.managedObjectContext
@@ -184,9 +179,6 @@ class PersonalInfoViewController: UIViewController, UITableViewDataSource,UITabl
             } catch let error as NSError {
                 print("Could not fetch \(error), \(error.userInfo)")
             }
-
-            
-            
             
             tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
         })
