@@ -11,9 +11,9 @@ import UIKit
 
 
 func register_notification () {
-    let settings = UIUserNotificationSettings(types: UIUserNotificationType([.alert, .badge, .sound]), categories: nil)
-    UIApplication.shared.registerUserNotificationSettings(settings)
-    UIApplication.shared.registerForRemoteNotifications()
+    let settings = UIUserNotificationSettings(forTypes: UIUserNotificationType([.Alert, .Badge, .Sound]), categories: nil)
+    UIApplication.sharedApplication().registerUserNotificationSettings(settings)
+    UIApplication.sharedApplication().registerForRemoteNotifications()
     
     /*
     /*Check Authorization*/

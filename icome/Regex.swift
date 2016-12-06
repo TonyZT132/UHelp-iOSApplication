@@ -13,11 +13,11 @@ struct MyRegex {
     
     init(_ pattern: String) {
         regex = try? NSRegularExpression(pattern: pattern,
-            options: .caseInsensitive)
+            options: .CaseInsensitive)
     }
     
-    func match(_ input: String) -> Bool {
-        if let matches = regex?.matches(in: input,
+    func match(input: String) -> Bool {
+        if let matches = regex?.matchesInString(input,
             options: [],
             range: NSMakeRange(0, (input as NSString).length)) {
                 return matches.count > 0

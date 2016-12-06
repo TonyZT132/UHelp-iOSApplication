@@ -9,7 +9,7 @@
 import Foundation
 
 
-func distance_calc (_ distance:Double) -> String {
+func distance_calc (distance:Double) -> String {
     
     let distance_in_km = distance / 1000
     if(distance_in_km < 0.05){

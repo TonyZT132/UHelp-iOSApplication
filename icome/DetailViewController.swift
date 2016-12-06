@@ -31,7 +31,7 @@ class DetailViewController: UIViewController,RCIMUserInfoDataSource, UITableView
     var ScrollViewHeight:CGFloat = 0
     
     /*Screen Width*/
-    let WIDTH = UIScreen.main.bounds.width
+    let WIDTH = UIScreen.mainScreen().bounds.width
     
     /*Follow Flag*/
     var isFollowed = false
@@ -76,42 +76,42 @@ class DetailViewController: UIViewController,RCIMUserInfoDataSource, UITableView
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        CommentTextView = KMPlaceholderTextView(frame: CGRect(x: 20, y: 40, width: WIDTH - 40, height: 60))
-        CommentTextView!.layer.backgroundColor = UIColor.white.cgColor
+        CommentTextView = KMPlaceholderTextView(frame: CGRectMake(20, 40, WIDTH - 40, 60))
+        CommentTextView!.layer.backgroundColor = UIColor.whiteColor().CGColor
         CommentTextView!.placeholder = "请输入留言内容"
-        CommentTextView?.font = UIFont.systemFont(ofSize: 16)
+        CommentTextView?.font = UIFont.systemFontOfSize(16)
         CommentTextView!.layer.cornerRadius = 3
         CommentTextView!.clipsToBounds = true
         CommentTextView?.delegate = self
         KeyboardView.addSubview(CommentTextView!)
-        BookButton.isHidden = true
-        FollowButton.isHidden = true
+        BookButton.hidden = true
+        FollowButton.hidden = true
         FeaturedImage.layer.cornerRadius = FeaturedImage.frame.size.height/2
         FeaturedImage.clipsToBounds = true
         
-        self.CommentButton.setTitle("留言", for: UIControlState())
-        self.CommentButton.backgroundColor = UIColor.white
+        self.CommentButton.setTitle("留言", forState: .Normal)
+        self.CommentButton.backgroundColor = UIColor.whiteColor()
         self.CommentButton.layer.cornerRadius = self.CommentButton.frame.height / 2
         self.CommentButton.clipsToBounds = true
         self.CommentButton.layer.borderWidth = 1
-        self.CommentButton.layer.borderColor = UIColor(red: 248.0/255.0, green: 143.0/255.0, blue: 51.0/255.0, alpha:1.0).cgColor
+        self.CommentButton.layer.borderColor = UIColor(red: 248.0/255.0, green: 143.0/255.0, blue: 51.0/255.0, alpha:1.0).CGColor
         
         /*Load Data*/
         loadData()
         
         /*Add one view count*/
-        PFCloud.callFunction(inBackground: "AddCount_Home", withParameters: ["objectid":objectId_detail])
+        PFCloud.callFunctionInBackground("AddCount_Home", withParameters: ["objectid":objectId_detail])
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        KeyboardView.isHidden = true
-        NotificationCenter.default.addObserver(self, selector:#selector(DetailViewController.keyBoardWillShow(_:)), name:NSNotification.Name.UIKeyboardWillShow, object: nil)
-        NotificationCenter.default.addObserver(self, selector:#selector(DetailViewController.keyBoardWillHide(_:)), name:NSNotification.Name.UIKeyboardWillHide, object: nil)
+    override func viewWillAppear(animated: Bool) {
+        KeyboardView.hidden = true
+        NSNotificationCenter.defaultCenter().addObserver(self, selector:#selector(DetailViewController.keyBoardWillShow(_:)), name:UIKeyboardWillShowNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector:#selector(DetailViewController.keyBoardWillHide(_:)), name:UIKeyboardWillHideNotification, object: nil)
     }
     
-    override func viewWillDisappear(_ animated: Bool) {
-        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillShow, object: nil)
-        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillHide, object: nil)
+    override func viewWillDisappear(animated: Bool) {
+        NSNotificationCenter.defaultCenter().removeObserver(self, name: UIKeyboardWillShowNotification, object: nil)
+        NSNotificationCenter.defaultCenter().removeObserver(self, name: UIKeyboardWillHideNotification, object: nil)
     }
 
     /*Load data*/
@@ -120,7 +120,7 @@ class DetailViewController: UIViewController,RCIMUserInfoDataSource, UITableView
         /*Query from Parse class*/
         let loadData = PFQuery(className:dataClass)
         loadData.whereKey("objectId", equalTo:objectId_detail)
-        loadData.findObjectsInBackground {
+        loadData.findObjectsInBackgroundWithBlock {
             (objects: [PFObject]?, error: NSError?) -> Void in
             
             if error == nil {
@@ -128,11 +128,11 @@ class DetailViewController: UIViewController,RCIMUserInfoDataSource, UITableView
                 print("Successfully retrieved \(objects!.count) scores.")
                 
                 for obj:AnyObject in objects!{
-                    self.detail_obj.add(obj)
+                    self.detail_obj.addObject(obj)
                 }
                 
-                if(self.detail_obj.firstObject?.object(forKey: "view_count") != nil){
-                    let count = self.detail_obj.firstObject?.object(forKey: "view_count") as! Int
+                if(self.detail_obj.firstObject?.objectForKey("view_count") != nil){
+                    let count = self.detail_obj.firstObject?.objectForKey("view_count") as! Int
                     self.ViewCount.text = String(count)
                     
                 }else{
@@ -140,21 +140,21 @@ class DetailViewController: UIViewController,RCIMUserInfoDataSource, UITableView
                 }
                 
                 
-                self.City.text = (self.detail_obj.firstObject?.object(forKey: "city") as! String) + " / " + (self.detail_obj.firstObject?.object(forKey: "category") as! String)
+                self.City.text = (self.detail_obj.firstObject?.objectForKey("city") as! String) + " / " + (self.detail_obj.firstObject?.objectForKey("category") as! String)
                 
-                let user = self.detail_obj.firstObject?.object(forKey: "user") as! PFUser
+                let user = self.detail_obj.firstObject?.objectForKey("user") as! PFUser
                 self.HostUserId = user.objectId
                 
-                if((self.detail_obj.firstObject?.object(forKey: "gender") as! String) == "F"){
-                    self.FollowButton.setTitle("关注她", for: UIControlState())
-                    self.BookButton.setTitle("联系她", for: UIControlState())
+                if((self.detail_obj.firstObject?.objectForKey("gender") as! String) == "F"){
+                    self.FollowButton.setTitle("关注她", forState: .Normal)
+                    self.BookButton.setTitle("联系她", forState: .Normal)
                 }else{
-                    self.FollowButton.setTitle("关注他", for: UIControlState())
-                    self.BookButton.setTitle("联系他", for: UIControlState())
+                    self.FollowButton.setTitle("关注他", forState: .Normal)
+                    self.BookButton.setTitle("联系他", forState: .Normal)
                 }
                 
-                if(self.detail_obj.firstObject?.object(forKey: "comments") != nil){
-                    self.CommentData = self.detail_obj.firstObject?.object(forKey: "comments") as! Array
+                if(self.detail_obj.firstObject?.objectForKey("comments") != nil){
+                    self.CommentData = self.detail_obj.firstObject?.objectForKey("comments") as! Array
                     self.CommentCount.text = String(self.CommentData.count)
                 }else{
                     self.CommentCount.text = "0"
@@ -168,21 +168,21 @@ class DetailViewController: UIViewController,RCIMUserInfoDataSource, UITableView
                 self.BookButton.layer.cornerRadius = self.BookButton.frame.height / 2
                 self.BookButton.clipsToBounds = true
                 self.BookButton.layer.borderWidth = 1
-                self.BookButton.layer.borderColor = UIColor(red: 248.0/255.0, green: 143.0/255.0, blue: 51.0/255.0, alpha:1.0).cgColor
+                self.BookButton.layer.borderColor = UIColor(red: 248.0/255.0, green: 143.0/255.0, blue: 51.0/255.0, alpha:1.0).CGColor
                 
-                if(user.objectId == PFUser.current()?.objectId){
-                    self.FollowButton.isHidden = true
-                    self.BookButton.isHidden = true
+                if(user.objectId == PFUser.currentUser()?.objectId){
+                    self.FollowButton.hidden = true
+                    self.BookButton.hidden = true
                 }else{
-                    self.BookButton.isHidden = false
+                    self.BookButton.hidden = false
                 }
                 
                 self.ViewCountImage.image = UIImage(named: "点击数")
-                self.full_image_arr = self.detail_obj.firstObject!.object(forKey: "full_image") as! Array
+                self.full_image_arr = self.detail_obj.firstObject!.objectForKey("full_image") as! Array
                 self.updateView()
                 
-                self.NickName.text = user.object(forKey: "nick_name") as? String
-                let gender_temp = user.object(forKey: "gender") as? String
+                self.NickName.text = user.objectForKey("nick_name") as? String
+                let gender_temp = user.objectForKey("gender") as? String
                 if(gender_temp != nil){
                     if (gender_temp == "M"){
                         self.GenderImage.image = UIImage(named: "性别男")
@@ -195,11 +195,11 @@ class DetailViewController: UIViewController,RCIMUserInfoDataSource, UITableView
                     }
                 }
                 
-                let userImageFile = user.object(forKey: "featured_image")  as! PFFile
+                let userImageFile = user.objectForKey("featured_image")  as! PFFile
                 
                 //print(userImageFile)
-                userImageFile.getDataInBackground {
-                    (imageData: Data?, error: NSError?) -> Void in
+                userImageFile.getDataInBackgroundWithBlock {
+                    (imageData: NSData?, error: NSError?) -> Void in
                     if error == nil {
                         if let imageData = imageData {
                             self.FeaturedImage.image = UIImage(data:imageData)
@@ -219,7 +219,7 @@ class DetailViewController: UIViewController,RCIMUserInfoDataSource, UITableView
         }
         
         /*Update Count*/
-        PFCloud.callFunction(inBackground: "AddCount_Home", withParameters: ["objectid":objectId_detail, "tablename": dataClass])
+        PFCloud.callFunctionInBackground("AddCount_Home", withParameters: ["objectid":objectId_detail, "tablename": dataClass])
     }
 
     /*Update the Scroll view*/
@@ -229,67 +229,67 @@ class DetailViewController: UIViewController,RCIMUserInfoDataSource, UITableView
         let TitleLabelHeight = CGFloat(14)
         let SkillTitleLabelHeight = CGFloat(14)
         
-        let CateLabel = UILabel(frame : CGRect(x: 10, y: 10, width: TopViewWidth/2 - 10, height: TitleLabelHeight))
-        let PriceLabel = UILabel(frame : CGRect(x: TopViewWidth/2, y: 10, width: TopViewWidth/2 - 10, height: TitleLabelHeight))
+        let CateLabel = UILabel(frame : CGRectMake(10, 10, TopViewWidth/2 - 10, TitleLabelHeight))
+        let PriceLabel = UILabel(frame : CGRectMake(TopViewWidth/2, 10, TopViewWidth/2 - 10, TitleLabelHeight))
         
-        CateLabel.text = (self.detail_obj.firstObject! as AnyObject).object(forKey: "title") as? String
-        CateLabel.textAlignment = .left
-        CateLabel.font = UIFont.systemFont(ofSize: 14)
-        PriceLabel.text = "$" + ((self.detail_obj.firstObject! as AnyObject).object(forKey: "price") as? String)! + "/" + ((self.detail_obj.firstObject! as AnyObject).object(forKey: "unit") as? String)!
-        PriceLabel.textAlignment = .right
-        PriceLabel.font = UIFont.systemFont(ofSize: 14)
+        CateLabel.text = self.detail_obj.firstObject!.objectForKey("title") as? String
+        CateLabel.textAlignment = .Left
+        CateLabel.font = UIFont.systemFontOfSize(14)
+        PriceLabel.text = "$" + (self.detail_obj.firstObject!.objectForKey("price") as? String)! + "/" + (self.detail_obj.firstObject!.objectForKey("unit") as? String)!
+        PriceLabel.textAlignment = .Right
+        PriceLabel.font = UIFont.systemFontOfSize(14)
         
-        let SkillNameLabel = UILabel(frame : CGRect(x: 10, y: 20 + CateLabel.frame.height , width: TopViewWidth/2 - 10, height: SkillTitleLabelHeight))
+        let SkillNameLabel = UILabel(frame : CGRectMake(10, 20 + CateLabel.frame.height , TopViewWidth/2 - 10, SkillTitleLabelHeight))
         SkillNameLabel.text = "技能描述"
-        SkillNameLabel.textAlignment = .left
-        SkillNameLabel.font = UIFont.systemFont(ofSize: 12)
+        SkillNameLabel.textAlignment = .Left
+        SkillNameLabel.font = UIFont.systemFontOfSize(12)
         SkillNameLabel.textColor = UIColor(red: 248.0/255.0, green: 143.0/255.0, blue: 51.0/255.0, alpha:1.0)
 
-        let skill_text = (self.detail_obj.firstObject! as AnyObject).object(forKey: "skill") as? String
+        let skill_text = self.detail_obj.firstObject!.objectForKey("skill") as? String
         let skill_line_hight = CGFloat(getStringHeight(skill_text!, fontSize: 12, width: TopViewWidth - 18))
         let skill_line = Int(skill_line_hight/12)
-        let Skill = UILabel(frame: CGRect(x: 10, y: 34 + SkillNameLabel.frame.height + 5, width: TopViewWidth - 18, height: skill_line_hight))
+        let Skill = UILabel(frame: CGRectMake(10, 34 + SkillNameLabel.frame.height + 5, TopViewWidth - 18, skill_line_hight))
         Skill.text = skill_text
         Skill.textColor = UIColor(red: 154.0/255.0, green: 151.0/255.0, blue: 151.0/255.0, alpha:1.0)
-        Skill.font = UIFont.systemFont(ofSize: 12)
-        Skill.lineBreakMode = .byWordWrapping
+        Skill.font = UIFont.systemFontOfSize(12)
+        Skill.lineBreakMode = .ByWordWrapping
         Skill.numberOfLines = skill_line + 1
         
         let temp = CGFloat(30 + CateLabel.frame.height + SkillTitleLabelHeight + skill_line_hight)
         
-        let ServiceNameLabel = UILabel(frame : CGRect(x: 10, y: temp + 5 , width: TopViewWidth/2 - 10, height: SkillTitleLabelHeight))
+        let ServiceNameLabel = UILabel(frame : CGRectMake(10, temp + 5 , TopViewWidth/2 - 10, SkillTitleLabelHeight))
         
         ServiceNameLabel.text = "服务描述"
-        ServiceNameLabel.textAlignment = .left
-        ServiceNameLabel.font = UIFont.systemFont(ofSize: 12)
+        ServiceNameLabel.textAlignment = .Left
+        ServiceNameLabel.font = UIFont.systemFontOfSize(12)
         ServiceNameLabel.textColor = UIColor(red: 248.0/255.0, green: 143.0/255.0, blue: 51.0/255.0, alpha:1.0)
 
-        let des = (detail_obj.firstObject as AnyObject).object(forKey: "description") as! String
+        let des = detail_obj.firstObject?.objectForKey("description") as! String
         
         let line_hight = CGFloat(getStringHeight(des, fontSize: 12, width: TopViewWidth - 18))
         let description_line = Int(line_hight/12)
         let DescriptionViewHeight = line_hight
-        let Description = UILabel(frame: CGRect(x: 10, y: temp + ServiceNameLabel.frame.height + 10 ,width: TopViewWidth - 18, height: DescriptionViewHeight))
+        let Description = UILabel(frame: CGRectMake(10, temp + ServiceNameLabel.frame.height + 10 ,TopViewWidth - 18, DescriptionViewHeight))
         
         Description.text = des
         Description.textColor =  UIColor(red: 154.0/255.0, green: 151.0/255.0, blue: 151.0/255.0, alpha:1.0)
-        Description.font = UIFont.systemFont(ofSize: 12)
-        Description.lineBreakMode = .byWordWrapping
+        Description.font = UIFont.systemFontOfSize(12)
+        Description.lineBreakMode = .ByWordWrapping
         Description.numberOfLines = description_line + 1
         
-        let TopLine = UIView(frame: CGRect(x: 10, y: 15 + CateLabel.frame.height ,width: TopViewWidth - 20 ,height: 0.5))
-        TopLine.layer.backgroundColor =  UIColor(red: 154.0/255.0, green: 151.0/255.0, blue: 151.0/255.0, alpha:0.3).cgColor
+        let TopLine = UIView(frame: CGRectMake(10, 15 + CateLabel.frame.height ,TopViewWidth - 20 ,0.5))
+        TopLine.layer.backgroundColor =  UIColor(red: 154.0/255.0, green: 151.0/255.0, blue: 151.0/255.0, alpha:0.3).CGColor
         
         let TopViewHeight = CGFloat(temp + 15 + DescriptionViewHeight + ServiceNameLabel.frame.height)
-        let TopView = UIView(frame: CGRect(x: (WIDTH - TopViewWidth) / 2, y: 10, width: TopViewWidth, height: TopViewHeight))
-        TopView.layer.backgroundColor = UIColor.green.cgColor
+        let TopView = UIView(frame: CGRectMake((WIDTH - TopViewWidth) / 2, 10, TopViewWidth, TopViewHeight))
+        TopView.layer.backgroundColor = UIColor.greenColor().CGColor
         
         let rectShape = CAShapeLayer()
         rectShape.bounds = TopView.frame
         rectShape.position = TopView.center
-        rectShape.path = UIBezierPath(roundedRect: TopView.bounds, byRoundingCorners: [UIRectCorner.topLeft, UIRectCorner.topRight], cornerRadii: CGSize(width: 7, height: 7)).cgPath
+        rectShape.path = UIBezierPath(roundedRect: TopView.bounds, byRoundingCorners: [UIRectCorner.TopLeft, UIRectCorner.TopRight], cornerRadii: CGSize(width: 7, height: 7)).CGPath
         
-        TopView.layer.backgroundColor = UIColor.white.cgColor
+        TopView.layer.backgroundColor = UIColor.whiteColor().CGColor
         TopView.layer.mask = rectShape
         
         TopView.addSubview(CateLabel)
@@ -305,7 +305,7 @@ class DetailViewController: UIViewController,RCIMUserInfoDataSource, UITableView
         var ImageListHeight = TopViewHeight + 10
         
         var image_size_arr = [NSDictionary]()
-        image_size_arr = (self.detail_obj.firstObject! as AnyObject).object(forKey: "image_size") as! Array
+        image_size_arr = self.detail_obj.firstObject!.objectForKey("image_size") as! Array
         
         for i in 0 ... image_size_arr.count - 1{
             /*Gap for Image*/
@@ -313,13 +313,13 @@ class DetailViewController: UIViewController,RCIMUserInfoDataSource, UITableView
             let ImageHeight = CGFloat(getImageHeight(image_size_arr[i], image_width: ImageViewWidth))
             
             
-            let FullImage = UIButton(frame: CGRect(x: (WIDTH - TopViewWidth) / 2, y: ImageListHeight, width: ImageViewWidth, height: ImageHeight))
+            let FullImage = UIButton(frame: CGRectMake((WIDTH - TopViewWidth) / 2, ImageListHeight, ImageViewWidth, ImageHeight))
             
-            FullImage.setImage(UIImage(named: "载入中"), for: UIControlState())
+            FullImage.setImage(UIImage(named: "载入中"), forState: .Normal)
             
             ImageViewArr.append(FullImage)
             FullImage.tag = i
-            FullImage.addTarget(self, action: #selector(DetailViewController.selected(_:)), for: .touchUpInside)
+            FullImage.addTarget(self, action: #selector(DetailViewController.selected(_:)), forControlEvents: .TouchUpInside)
             ImageListHeight += ImageHeight
             ScrollView.addSubview(FullImage)
         }
@@ -331,17 +331,17 @@ class DetailViewController: UIViewController,RCIMUserInfoDataSource, UITableView
         ScrollViewHeight += ImageListHeight
         
         /*Add commment table here*/
-        let CommentWidget = UIView(frame: CGRect(x: 0, y: ScrollViewHeight, width: WIDTH , height: 40))
-        CommentWidget.layer.backgroundColor = UIColor.white.cgColor
+        let CommentWidget = UIView(frame: CGRectMake(0, ScrollViewHeight, WIDTH , 40))
+        CommentWidget.layer.backgroundColor = UIColor.whiteColor().CGColor
         
-        CommentTitleLabel = UILabel(frame:CGRect(x: 15,y: 0, width: CommentWidget.frame.width - 30 ,height: CommentWidget.frame.height))
+        CommentTitleLabel = UILabel(frame:CGRectMake(15,0, CommentWidget.frame.width - 30 ,CommentWidget.frame.height))
         
         CommentTitleLabel!.text = "留言板（\(self.CommentData.count)）"
         
-        CommentTitleLabel!.textAlignment = .left
-        CommentTitleLabel!.font = UIFont.systemFont(ofSize: 14)
-        let BotLine = UIView(frame: CGRect(x: 0,y: CommentWidget.frame.height - 0.5 ,width: CommentWidget.frame.width ,height: 0.5))
-        BotLine.layer.backgroundColor =  UIColor.black.cgColor
+        CommentTitleLabel!.textAlignment = .Left
+        CommentTitleLabel!.font = UIFont.systemFontOfSize(14)
+        let BotLine = UIView(frame: CGRectMake(0,CommentWidget.frame.height - 0.5 ,CommentWidget.frame.width ,0.5))
+        BotLine.layer.backgroundColor =  UIColor.blackColor().CGColor
         CommentWidget.addSubview(CommentTitleLabel!)
         CommentWidget.addSubview(BotLine)
         ScrollViewHeight += CommentWidget.frame.height
@@ -357,13 +357,13 @@ class DetailViewController: UIViewController,RCIMUserInfoDataSource, UITableView
     }
     
     /*Load the full image*/
-    func LoadImage(_ index:Int){
+    func LoadImage(index:Int){
         let ImageFile = full_image_arr[index]
-        ImageFile.getDataInBackground {
-            (imageData: Data?, error: NSError?) -> Void in
+        ImageFile.getDataInBackgroundWithBlock {
+            (imageData: NSData?, error: NSError?) -> Void in
             if error == nil {
                 if let imageData = imageData {
-                    self.ImageViewArr[index].setImage(UIImage(data:imageData), for: UIControlState())
+                    self.ImageViewArr[index].setImage(UIImage(data:imageData), forState: .Normal)
                 }else{
                     NSLog("详情页图片格式转换失败")
                 }
@@ -374,7 +374,7 @@ class DetailViewController: UIViewController,RCIMUserInfoDataSource, UITableView
     }
     
     /*Get the full image size*/
-    func getImageHeight(_ size:NSDictionary , image_width:CGFloat) -> Double {
+    func getImageHeight(size:NSDictionary , image_width:CGFloat) -> Double {
         
         let image_size = size
         let height = image_size["height"] as! CGFloat
@@ -385,11 +385,11 @@ class DetailViewController: UIViewController,RCIMUserInfoDataSource, UITableView
     }
     
     /*When user select the full image*/
-    func selected (_ sender: UIButton!) {
+    func selected (sender: UIButton!) {
         let userImageFile = full_image_arr[sender.tag] 
-        let fullImage : FullImageViewController = self.storyboard?.instantiateViewController(withIdentifier: "full_image") as! FullImageViewController
+        let fullImage : FullImageViewController = self.storyboard?.instantiateViewControllerWithIdentifier("full_image") as! FullImageViewController
         fullImage.imageFile = userImageFile
-        self.navigationController!.navigationBar.tintColor = UIColor.white
+        self.navigationController!.navigationBar.tintColor = UIColor.whiteColor()
         self.navigationController?.pushViewController(fullImage, animated: true)
     }
 
@@ -399,48 +399,48 @@ class DetailViewController: UIViewController,RCIMUserInfoDataSource, UITableView
     }
     
     /*Calculate the question label height based on the question string*/
-    func getStringHeight(_ mytext: String, fontSize: CGFloat, width: CGFloat)->CGFloat {
-        let font = UIFont.systemFont(ofSize: fontSize)
-        let size = CGSize(width: width,height: CGFloat.greatestFiniteMagnitude)
+    func getStringHeight(mytext: String, fontSize: CGFloat, width: CGFloat)->CGFloat {
+        let font = UIFont.systemFontOfSize(fontSize)
+        let size = CGSizeMake(width,CGFloat.max)
         let paragraphStyle = NSMutableParagraphStyle()
-        paragraphStyle.lineBreakMode = .byWordWrapping;
+        paragraphStyle.lineBreakMode = .ByWordWrapping;
         let attributes = [NSFontAttributeName:font,
             NSParagraphStyleAttributeName:paragraphStyle.copy()]
         let text = mytext as NSString
-        let rect = text.boundingRect(with: size, options:.usesLineFragmentOrigin, attributes: attributes, context:nil)
+        let rect = text.boundingRectWithSize(size, options:.UsesLineFragmentOrigin, attributes: attributes, context:nil)
         return rect.size.height
     }
     
     /*This function will be triggered when user*/
-    @IBAction func book_tapped(_ sender: AnyObject) {
+    @IBAction func book_tapped(sender: AnyObject) {
         
-        let user = (detail_obj[0] as AnyObject).object(forKey: "user") as! PFUser
-        usernameTarget = user.object(forKey: "username") as? String
-        nicknameTarget = user.object(forKey: "nick_name") as? String
+        let user = detail_obj[0].objectForKey("user") as! PFUser
+        usernameTarget = user.objectForKey("username") as? String
+        nicknameTarget = user.objectForKey("nick_name") as? String
         
-        let conv : ConversationViewController = self.storyboard?.instantiateViewController(withIdentifier: "conversation") as! ConversationViewController
+        let conv : ConversationViewController = self.storyboard?.instantiateViewControllerWithIdentifier("conversation") as! ConversationViewController
         
         self.navigationController?.pushViewController(conv, animated: true)
     }
     
     /*Get user info for the priviate conversation*/
-    func getUserInfo(withUserId userId: String!, completion: ((RCUserInfo?) -> Void)!) {
+    func getUserInfoWithUserId(userId: String!, completion: ((RCUserInfo!) -> Void)!) {
         let userInfo = RCUserInfo()
         userInfo.userId = userId
         userInfo.name = "友帮用户"
         
         let loadAllData:PFQuery = PFQuery(className: "_User")
         loadAllData.whereKey("username", equalTo:userId)
-        loadAllData.findObjectsInBackground {
+        loadAllData.findObjectsInBackgroundWithBlock {
             (objects: [PFObject]?, error: NSError?) -> Void in
             if error == nil {
                 let temp = NSMutableArray()
                 // Do something with the found objects
                 for obj:AnyObject in objects!{
-                    temp.add(obj)
+                    temp.addObject(obj)
                 }
-                userInfo.name = temp.firstObject!.object(forKey: "nick_name") as? String
-                let image_file = temp.firstObject!.object(forKey: "featured_image") as? PFFile
+                userInfo.name = temp.firstObject!.objectForKey("nick_name") as? String
+                let image_file = temp.firstObject!.objectForKey("featured_image") as? PFFile
                 userInfo.portraitUri = image_file?.url
                 completion(userInfo)
             } else {
@@ -454,36 +454,36 @@ class DetailViewController: UIViewController,RCIMUserInfoDataSource, UITableView
     /*Check whether the current person is followed by the user*/
     func check_follower(){
         var follower_arr:[String] = [String]()
-        if(PFUser.current()?.object(forKey: "follow") != nil){
-            follower_arr = PFUser.current()?.object(forKey: "follow") as! Array
+        if(PFUser.currentUser()?.objectForKey("follow") != nil){
+            follower_arr = PFUser.currentUser()?.objectForKey("follow") as! Array
             
-            let user = (detail_obj.firstObject! as AnyObject).object(forKey: "user") as! PFUser
+            let user = detail_obj.firstObject!.objectForKey("user") as! PFUser
             let id_temp = user.objectId
             for id in follower_arr {
                 if (id == (id_temp!)){
                     isFollowed = true
-                    FollowButton.setTitle("已关注", for: UIControlState())
+                    FollowButton.setTitle("已关注", forState: .Normal)
                     FollowButton.backgroundColor = UIColor(red: 154.0/255.0, green: 151.0/255.0, blue: 151.0/255.0, alpha:1.0)
                 }
             }
         }else{
             NSLog("not found, list is undefined")
         }
-        self.FollowButton.isHidden = false
+        self.FollowButton.hidden = false
     }
     
     /*This function will be triggered when user touch report button*/
-    @IBAction func report(_ sender: AnyObject) {
-        let report : ReportNavViewController = self.storyboard?.instantiateViewController(withIdentifier: REPORT_NAV) as! ReportNavViewController
+    @IBAction func report(sender: AnyObject) {
+        let report : ReportNavViewController = self.storyboard?.instantiateViewControllerWithIdentifier(REPORT_NAV) as! ReportNavViewController
         
-        let user = (detail_obj[0] as AnyObject).object(forKey: "user") as! PFUser
+        let user = detail_obj[0].objectForKey("user") as! PFUser
         
-        reportedUser = (user.object(forKey: "username") as? String)!
-        self.present(report, animated: true, completion: nil)
+        reportedUser = (user.objectForKey("username") as? String)!
+        self.presentViewController(report, animated: true, completion: nil)
     }
     
     /*When user click the follow button*/
-    @IBAction func follow(_ sender: AnyObject) {
+    @IBAction func follow(sender: AnyObject) {
         
         if(isFollowed == false){
             add_follower()
@@ -496,14 +496,14 @@ class DetailViewController: UIViewController,RCIMUserInfoDataSource, UITableView
     func add_follower(){
         
         var follower_arr = [String]()
-        if(PFUser.current()?.object(forKey: "follow") != nil){
-            follower_arr = PFUser.current()?.object(forKey: "follow") as! Array
+        if(PFUser.currentUser()?.objectForKey("follow") != nil){
+            follower_arr = PFUser.currentUser()?.objectForKey("follow") as! Array
         }
-        let user = (detail_obj.firstObject! as AnyObject).object(forKey: "user") as! PFUser
+        let user = detail_obj.firstObject!.objectForKey("user") as! PFUser
         let id = user.objectId
         follower_arr.append(id!)
         
-        if let currentUser = PFUser.current(){
+        if let currentUser = PFUser.currentUser(){
             currentUser["follow"] = follower_arr
             currentUser.saveInBackground()
         }
@@ -512,14 +512,14 @@ class DetailViewController: UIViewController,RCIMUserInfoDataSource, UITableView
     
     //MARK: TableView: Comment Table
     
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return self.CommentData.count
     }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell
+    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell
     {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "comment_cell") as! CommentTableViewCell
-        cell.selectionStyle = .none
+        let cell = tableView.dequeueReusableCellWithIdentifier("comment_cell") as! CommentTableViewCell
+        cell.selectionStyle = .None
         
         cell.Featured_Image.layer.cornerRadius = cell.Featured_Image.frame.height / 2
         cell.clipsToBounds = true
@@ -529,7 +529,7 @@ class DetailViewController: UIViewController,RCIMUserInfoDataSource, UITableView
         let FromUser = CommentItemData["From"] as! PFUser
         let queryfrom = PFQuery(className:"_User")
         
-        queryfrom.getObjectInBackground(withId: FromUser.objectId!) {
+        queryfrom.getObjectInBackgroundWithId(FromUser.objectId!) {
             (user_from: PFObject?, error: NSError?) -> Void in
             if error != nil {
                 print(error)
@@ -542,17 +542,17 @@ class DetailViewController: UIViewController,RCIMUserInfoDataSource, UITableView
                 
                 if(ToUser != nil){
                     /*This is a Reply Comment, Load Both FromUser and ToUser Names*/
-                    cell.Usernames.text = (user_from.object(forKey: "nick_name") as? String)! + " 回复 " + (CommentItemDataInside["To_Name"] as? String)!
+                    cell.Usernames.text = (user_from.objectForKey("nick_name") as? String)! + " 回复 " + (CommentItemDataInside["To_Name"] as? String)!
                     ToUser = nil
                 }else{
                     
                     /*Load From User Only*/
-                    cell.Usernames.text = user_from.object(forKey: "nick_name") as? String
+                    cell.Usernames.text = user_from.objectForKey("nick_name") as? String
                 }
                 
-                let userImageFile = user_from.object(forKey: "featured_image")  as! PFFile
-                userImageFile.getDataInBackground {
-                    (imageData: Data?, error: NSError?) -> Void in
+                let userImageFile = user_from.objectForKey("featured_image")  as! PFFile
+                userImageFile.getDataInBackgroundWithBlock {
+                    (imageData: NSData?, error: NSError?) -> Void in
                         
                     if error == nil {
                         if let imageData = imageData {
@@ -571,24 +571,24 @@ class DetailViewController: UIViewController,RCIMUserInfoDataSource, UITableView
         cell.Content.text = CommentItemData["Content"] as? String
         
         /*Load Post Date*/
-        let date = CommentItemData["Date"] as! Date
+        let date = CommentItemData["Date"] as! NSDate
         
         /*Get Current Date*/
-        let CurrentDate = Date()
+        let CurrentDate = NSDate()
         
         /*Calculate the Different between Current Date and Post Date*/
-        let diffDateComponents = (Calendar.current as NSCalendar).components([NSCalendar.Unit.year, NSCalendar.Unit.month, NSCalendar.Unit.day, NSCalendar.Unit.hour, NSCalendar.Unit.minute, NSCalendar.Unit.second], from: date, to: CurrentDate, options: NSCalendar.Options.init(rawValue: 0))
+        let diffDateComponents = NSCalendar.currentCalendar().components([NSCalendarUnit.Year, NSCalendarUnit.Month, NSCalendarUnit.Day, NSCalendarUnit.Hour, NSCalendarUnit.Minute, NSCalendarUnit.Second], fromDate: date, toDate: CurrentDate, options: NSCalendarOptions.init(rawValue: 0))
         
         if(diffDateComponents.year != 0 || diffDateComponents.month != 0 || diffDateComponents.day != 0){
-            let dateFormatter = DateFormatter()
+            let dateFormatter = NSDateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd"
-            let strDate = dateFormatter.string(from: date)
+            let strDate = dateFormatter.stringFromDate(date)
             cell.Date.text = strDate
         }else{
             if(diffDateComponents.hour != 0 ){
-                cell.Date.text = String(describing: diffDateComponents.hour) + "小时前"
+                cell.Date.text = String(diffDateComponents.hour) + "小时前"
             }else if (diffDateComponents.minute != 0){
-                cell.Date.text = String(describing: diffDateComponents.minute) + "分钟前"
+                cell.Date.text = String(diffDateComponents.minute) + "分钟前"
             }else{
                 cell.Date.text = "刚刚"
             }
@@ -596,96 +596,96 @@ class DetailViewController: UIViewController,RCIMUserInfoDataSource, UITableView
         return cell
     }
     
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         
         /*Get ToUser Info*/
         let CommentItemData = CommentData[indexPath.row] as! NSDictionary
         RepliedUser = CommentItemData["From"] as? PFUser
         RepliedUser_Name = CommentItemData["From_Name"] as? String
         
-        if(RepliedUser != PFUser.current()){
+        if(RepliedUser != PFUser.currentUser()){
             
             /*If the ToUser is not the CurrentUser, enable Reply Mode*/
             ReplyMode = true
             CommentTextView!.placeholder = "回复\(RepliedUser_Name!)"
-            self.Comment_Submit.setTitleColor(UIColor(red: 190.0/255.0, green: 190.0/255.0, blue: 190.0/255.0, alpha:1.0), for: UIControlState())
+            self.Comment_Submit.setTitleColor(UIColor(red: 190.0/255.0, green: 190.0/255.0, blue: 190.0/255.0, alpha:1.0), forState: .Normal)
             CommentTextView?.becomeFirstResponder()
         }else{
             
             /*If the ToUser is the CurrentUser, Enable Delete Mode*/
             DeleteMode = true
-            let optionMenu = UIAlertController(title: nil, message: "是否删除回复", preferredStyle: .actionSheet)
-            let DeleteAction = UIAlertAction(title: "删除", style: .default, handler: {
+            let optionMenu = UIAlertController(title: nil, message: "是否删除回复", preferredStyle: .ActionSheet)
+            let DeleteAction = UIAlertAction(title: "删除", style: .Default, handler: {
                 (alert: UIAlertAction!) -> Void in
-                self.CommentData.remove(at: indexPath.row)
-                tableView.deleteRows(at: [indexPath], with: .fade)
+                self.CommentData.removeAtIndex(indexPath.row)
+                tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
                 self.UpdateComments()
             })
-            let CancelAction = UIAlertAction(title: "取消", style: .cancel, handler: {
+            let CancelAction = UIAlertAction(title: "取消", style: .Cancel, handler: {
                 (alert: UIAlertAction!) -> Void in
             })
             
             optionMenu.addAction(DeleteAction)
             optionMenu.addAction(CancelAction)
-            self.present(optionMenu, animated: true, completion: nil)
+            self.presentViewController(optionMenu, animated: true, completion: nil)
         }
     }
     
     //MARK: Keyboard Handler
     
-    func keyBoardWillShow(_ note:Notification)
+    func keyBoardWillShow(note:NSNotification)
     {
-        KeyboardView.isHidden = false
+        KeyboardView.hidden = false
         let userInfo  = note.userInfo!
-        let  keyBoardBounds = (userInfo[UIKeyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
+        let  keyBoardBounds = (userInfo[UIKeyboardFrameEndUserInfoKey] as! NSValue).CGRectValue()
         let duration = (userInfo[UIKeyboardAnimationDurationUserInfoKey] as! NSNumber).doubleValue
-        var _ = self.view.convert(keyBoardBounds, to:nil)
+        var _ = self.view.convertRect(keyBoardBounds, toView:nil)
         var _ = KeyboardView.frame
         let deltaY = keyBoardBounds.size.height
         let animations:(() -> Void) = {
-            self.KeyboardView.transform = CGAffineTransform(translationX: 0,y: -deltaY)
+            self.KeyboardView.transform = CGAffineTransformMakeTranslation(0,-deltaY)
         }
         if duration > 0 {
-            let options = UIViewAnimationOptions(rawValue: UInt((userInfo[UIKeyboardAnimationCurveUserInfoKey] as! NSNumber).intValue << 16))
-            UIView.animate(withDuration: duration, delay: 0, options:options, animations: animations, completion: nil)
+            let options = UIViewAnimationOptions(rawValue: UInt((userInfo[UIKeyboardAnimationCurveUserInfoKey] as! NSNumber).integerValue << 16))
+            UIView.animateWithDuration(duration, delay: 0, options:options, animations: animations, completion: nil)
         }else{
             animations()
         }
     }
     
-    func keyBoardWillHide(_ note:Notification)
+    func keyBoardWillHide(note:NSNotification)
     {
         let userInfo = note.userInfo!
         let duration = (userInfo[UIKeyboardAnimationDurationUserInfoKey] as! NSNumber).doubleValue
         let animations:(() -> Void) = {
-            self.KeyboardView.transform = CGAffineTransform.identity
+            self.KeyboardView.transform = CGAffineTransformIdentity
         }
         if duration > 0 {
-            let options = UIViewAnimationOptions(rawValue: UInt((userInfo[UIKeyboardAnimationCurveUserInfoKey] as! NSNumber).intValue << 16))
-            UIView.animate(withDuration: duration, delay: 0, options:options, animations: animations, completion: nil)
+            let options = UIViewAnimationOptions(rawValue: UInt((userInfo[UIKeyboardAnimationCurveUserInfoKey] as! NSNumber).integerValue << 16))
+            UIView.animateWithDuration(duration, delay: 0, options:options, animations: animations, completion: nil)
         }else{
             animations()
         }
-        KeyboardView.isHidden = true
+        KeyboardView.hidden = true
     }
 
     
     //MARK: Comment Controll
     
     /*When User Click Comment Button*/
-    @IBAction func post_comment(_ sender: AnyObject) {
+    @IBAction func post_comment(sender: AnyObject) {
         ReplyMode = false
         CommentTextView!.placeholder = "请输入留言内容"
         RepliedUser = nil
-        self.Comment_Submit.setTitleColor(UIColor(red: 190.0/255.0, green: 190.0/255.0, blue: 190.0/255.0, alpha:1.0), for: UIControlState())
+        self.Comment_Submit.setTitleColor(UIColor(red: 190.0/255.0, green: 190.0/255.0, blue: 190.0/255.0, alpha:1.0), forState: .Normal)
         CommentTextView?.becomeFirstResponder()
     }
     
-    @IBAction func cancel_comment(_ sender: AnyObject) {
+    @IBAction func cancel_comment(sender: AnyObject) {
         CommentTextView?.resignFirstResponder()
     }
     
-    @IBAction func submit_comment(_ sender: AnyObject) {
+    @IBAction func submit_comment(sender: AnyObject) {
         
         /*Safety Check, block empty post*/
         if(CommentTextView?.text == nil || CommentTextView?.text == ""){
@@ -694,25 +694,25 @@ class DetailViewController: UIViewController,RCIMUserInfoDataSource, UITableView
         
         /*If the comment is valid, do submit*/
         if(canSubmit == true){
-            SVProgressHUD.setDefaultMaskType(SVProgressHUDMaskType.black)
+            SVProgressHUD.setDefaultMaskType(SVProgressHUDMaskType.Black)
             SVProgressHUD.show()
         
             var CommentInfo = [String : AnyObject]()
-            CommentInfo["From"] = PFUser.current()!
-            CommentInfo["From_Name"] = PFUser.current()!.object(forKey: "nick_name") as AnyObject?
+            CommentInfo["From"] = PFUser.currentUser()!
+            CommentInfo["From_Name"] = PFUser.currentUser()!.objectForKey("nick_name")
         
             if(RepliedUser != nil){
                 
                 /*Generate Personal Message for the Replied User*/
                 CommentInfo["To"] = RepliedUser
-                CommentInfo["To_Name"] = RepliedUser_Name as AnyObject?
+                CommentInfo["To_Name"] = RepliedUser_Name
                 var InfoData = [String:AnyObject]()
-                InfoData["From"] = PFUser.current()!.objectId! as AnyObject?
-                InfoData["Content"] = "回复了您" as AnyObject?
-                InfoData["Date"] = Date() as AnyObject?
-                InfoData["Read"] = false as AnyObject?
-                InfoData["Link"] = objectId_detail as AnyObject?
-                InfoData["Target"] = RepliedUser!.objectId! as AnyObject?
+                InfoData["From"] = PFUser.currentUser()!.objectId!
+                InfoData["Content"] = "回复了您"
+                InfoData["Date"] = NSDate()
+                InfoData["Read"] = false
+                InfoData["Link"] = objectId_detail
+                InfoData["Target"] = RepliedUser!.objectId!
                 
                 let Info = InfoData as NSDictionary
                 self.Generate_Info(RepliedUser!.objectId!,Dict: Info)
@@ -723,21 +723,21 @@ class DetailViewController: UIViewController,RCIMUserInfoDataSource, UITableView
                 CommentInfo["To_Name"] = nil
                 
                 var InfoData = [String:AnyObject]()
-                InfoData["From"] = PFUser.current()!.objectId! as AnyObject?
-                InfoData["Content"] = "评论了您" as AnyObject?
-                InfoData["Date"] = Date() as AnyObject?
-                InfoData["Read"] = false as AnyObject?
-                InfoData["Link"] = objectId_detail as AnyObject?
-                InfoData["Target"] = HostUserId! as AnyObject?
+                InfoData["From"] = PFUser.currentUser()!.objectId!
+                InfoData["Content"] = "评论了您"
+                InfoData["Date"] = NSDate()
+                InfoData["Read"] = false
+                InfoData["Link"] = objectId_detail
+                InfoData["Target"] = HostUserId!
                 
                 let Info = InfoData as NSDictionary
                 self.Generate_Info(HostUserId!,Dict: Info)
             }
-            CommentInfo["Content"] = CommentTextView?.text as AnyObject?
-            CommentInfo["Date"] = Date() as AnyObject?
+            CommentInfo["Content"] = CommentTextView?.text
+            CommentInfo["Date"] = NSDate()
             
             let CommetnInfo_Data = CommentInfo as NSDictionary
-            CommentData.insert(CommetnInfo_Data, at: 0)
+            CommentData.insert(CommetnInfo_Data, atIndex: 0)
             //CommentData.append(CommetnInfo_Data)
             
             /*Update Comment Table*/
@@ -745,23 +745,23 @@ class DetailViewController: UIViewController,RCIMUserInfoDataSource, UITableView
         }
     }
     
-    func Generate_Info(_ Target:String, Dict:NSDictionary){
+    func Generate_Info(Target:String, Dict:NSDictionary){
         let query = PFQuery(className:"personal_info_table")
         query.whereKey("TargetId", equalTo: Target)
-        query.findObjectsInBackground {
+        query.findObjectsInBackgroundWithBlock {
             (objects: [PFObject]?, error: NSError?) -> Void in
             
             if(error == nil){
                 let temp = NSMutableArray()
                 for obj:AnyObject in objects!{
-                    temp.add(obj)
+                    temp.addObject(obj)
                 }
                 if(temp.count > 0){
                     var info = [NSDictionary]()
-                    info = temp.firstObject!.object(forKey: "personal_info") as! Array
-                    info.insert(Dict, at: 0)
+                    info = temp.firstObject!.objectForKey("personal_info") as! Array
+                    info.insert(Dict, atIndex: 0)
                     
-                    query.getObjectInBackground(withId: (temp.firstObject!.objectId)!!){
+                    query.getObjectInBackgroundWithId((temp.firstObject!.objectId)!!){
                         (record: PFObject?, error: NSError?) -> Void in
                         
                         if error != nil {
@@ -791,7 +791,7 @@ class DetailViewController: UIViewController,RCIMUserInfoDataSource, UITableView
     /*Update Comment Table*/
     func UpdateComments(){
         let query = PFQuery(className:dataClass)
-        query.getObjectInBackground(withId: (detail_obj.firstObject! as AnyObject).objectId!!) {
+        query.getObjectInBackgroundWithId(detail_obj.firstObject!.objectId!!) {
             (detail: PFObject?, error: NSError?) -> Void in
             if error != nil {
                 /*Do Reset*/
@@ -842,7 +842,7 @@ class DetailViewController: UIViewController,RCIMUserInfoDataSource, UITableView
         }
         
         /*Reset Table Size*/
-        CommentTableView!.frame = CGRect(x: 0, y: ScrollViewHeight, width: WIDTH , height: TableViewHeight + 10)
+        CommentTableView!.frame = CGRectMake(0, ScrollViewHeight, WIDTH , TableViewHeight + 10)
         ScrollViewHeight += CommentTableView!.frame.height
         //ScrollView.addSubview(CommentTableView!)
         ScrollView.contentSize = CGSize(width: WIDTH, height: ScrollViewHeight)
@@ -873,10 +873,10 @@ class DetailViewController: UIViewController,RCIMUserInfoDataSource, UITableView
         CommentTableView!.rowHeight = UITableViewAutomaticDimension
         
         /*Set Table size with estimated data*/
-        CommentTableView!.frame = CGRect(x: 0, y: ScrollViewHeight, width: WIDTH , height: CGFloat(150 * CommentData.count))
-        CommentTableView!.backgroundColor = UIColor.white
-        CommentTableView!.register(UINib(nibName: "CommentTableViewCell", bundle: nil), forCellReuseIdentifier: "comment_cell")
-        CommentTableView?.isScrollEnabled = false
+        CommentTableView!.frame = CGRectMake(0, ScrollViewHeight, WIDTH , CGFloat(150 * CommentData.count))
+        CommentTableView!.backgroundColor = UIColor.whiteColor()
+        CommentTableView!.registerNib(UINib(nibName: "CommentTableViewCell", bundle: nil), forCellReuseIdentifier: "comment_cell")
+        CommentTableView?.scrollEnabled = false
         CommentTableView!.reloadData()
         
         /*Calculate the real cell height*/
@@ -885,7 +885,7 @@ class DetailViewController: UIViewController,RCIMUserInfoDataSource, UITableView
         }
         
         /*Reset Table Size*/
-        CommentTableView!.frame = CGRect(x: 0, y: ScrollViewHeight, width: WIDTH , height: TableViewHeight + 10)
+        CommentTableView!.frame = CGRectMake(0, ScrollViewHeight, WIDTH , TableViewHeight + 10)
         ScrollViewHeight += CommentTableView!.frame.height
         ScrollView.addSubview(CommentTableView!)
         ScrollView.contentSize = CGSize(width: WIDTH, height: ScrollViewHeight)
@@ -895,7 +895,7 @@ class DetailViewController: UIViewController,RCIMUserInfoDataSource, UITableView
     
     /*Scroll to Bottom*/
     func SetPosition(){
-        let bottomOffset = CGPoint(x: 0, y: self.ScrollView.contentSize.height - self.TableViewHeight);
+        let bottomOffset = CGPointMake(0, self.ScrollView.contentSize.height - self.TableViewHeight);
         
         //print(bottomOffset)
         self.ScrollView.setContentOffset(bottomOffset, animated: true)
@@ -904,20 +904,20 @@ class DetailViewController: UIViewController,RCIMUserInfoDataSource, UITableView
     //MARK: Comment TextView
     
     /*Text view listener*/
-    func textViewDidChange(_ textView: UITextView) {
+    func textViewDidChange(textView: UITextView) {
         let desStr = self.CommentTextView!.text as NSString
         let num = desStr.length
         if (num >= 100 || num < 1) {
             if(num>=100){
-                self.Comment_Submit.setTitle("字数过多", for: UIControlState())
+                self.Comment_Submit.setTitle("字数过多", forState: .Normal)
             }else{
-                self.Comment_Submit.setTitle("发送", for: UIControlState())
+                self.Comment_Submit.setTitle("发送", forState: .Normal)
             }
-            self.Comment_Submit.setTitleColor(UIColor(red: 190.0/255.0, green: 190.0/255.0, blue: 190.0/255.0, alpha:1.0), for: UIControlState())
+            self.Comment_Submit.setTitleColor(UIColor(red: 190.0/255.0, green: 190.0/255.0, blue: 190.0/255.0, alpha:1.0), forState: .Normal)
             canSubmit = false
         }else{
-            self.Comment_Submit.setTitle("发送", for: UIControlState())
-            self.Comment_Submit.setTitleColor(UIColor(red: 248.0/255.0, green: 143.0/255.0, blue: 51.0/255.0, alpha:1.0), for: UIControlState())
+            self.Comment_Submit.setTitle("发送", forState: .Normal)
+            self.Comment_Submit.setTitleColor(UIColor(red: 248.0/255.0, green: 143.0/255.0, blue: 51.0/255.0, alpha:1.0), forState: .Normal)
             canSubmit = true
         }
     }

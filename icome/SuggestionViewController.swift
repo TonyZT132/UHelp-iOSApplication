@@ -23,7 +23,7 @@ class SuggestionViewController: UIViewController {
         suggestion_button.clipsToBounds = true
         back_button.layer.cornerRadius = back_button.frame.height / 2
         back_button.clipsToBounds = true
-        suggestion_content.layer.borderColor = UIColor(red: 63.0/255.0, green: 31.0/255.0, blue: 105.0/255.0, alpha:1.0).cgColor
+        suggestion_content.layer.borderColor = UIColor(red: 63.0/255.0, green: 31.0/255.0, blue: 105.0/255.0, alpha:1.0).CGColor
     }
     
     override func didReceiveMemoryWarning() {
@@ -31,11 +31,11 @@ class SuggestionViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
-    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+    override func touchesEnded(touches: Set<UITouch>, withEvent event: UIEvent?) {
         suggestion_content.resignFirstResponder()
     }
     
-    override func viewWillAppear(_ animated: Bool) {
+    override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         navigationItem.title = "意见反馈"
     }
@@ -49,19 +49,19 @@ class SuggestionViewController: UIViewController {
     }
     
     /*Submit the report*/
-    @IBAction func report(_ sender: AnyObject) {
+    @IBAction func report(sender: AnyObject) {
         //loading.hidden = false
         //loading.startAnimating()
         //suggestion_button.hidden = true
         //back_button.hidden = true
         
-        let report_from = PFUser.current()!.username
+        let report_from = PFUser.currentUser()!.username
         let content = suggestion_content.text
         
         /*Check whether the input is empty*/
-        if(content?.isEmpty == true || content == ""){
+        if(content.isEmpty == true || content == ""){
             
-            self.present(show_alert_one_button(ERROR_ALERT, message: ERROR_EMPTY_CONTENT, actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
+            self.presentViewController(show_alert_one_button(ERROR_ALERT, message: ERROR_EMPTY_CONTENT, actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
             recover_button()
             return
         }
@@ -71,12 +71,12 @@ class SuggestionViewController: UIViewController {
         
         /*Check if char counts greater than 500*/
         if(num > 500){
-            self.present(show_alert_one_button(ERROR_ALERT, message: ERROR_TOO_MANY_WORDS, actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
+            self.presentViewController(show_alert_one_button(ERROR_ALERT, message: ERROR_TOO_MANY_WORDS, actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
             recover_button()
             return
         }
         
-        SVProgressHUD.setDefaultMaskType(SVProgressHUDMaskType.black)
+        SVProgressHUD.setDefaultMaskType(SVProgressHUDMaskType.Black)
         SVProgressHUD.show()
         
         //upload data
@@ -85,7 +85,7 @@ class SuggestionViewController: UIViewController {
         reportPost["from"] = report_from
         
         //upload to Parse
-        reportPost.saveInBackground {
+        reportPost.saveInBackgroundWithBlock {
             (success: Bool, error: NSError?) -> Void in
             if (success) {
                 //print("success")
@@ -93,27 +93,27 @@ class SuggestionViewController: UIViewController {
                 
                 SVProgressHUD.dismiss()
                 
-                let alert = UIAlertController(title: ALERT_SUCCESS, message: ALERT_THANKS_FOR_SUGGESTION, preferredStyle: UIAlertControllerStyle.alert)
-                let action_cancel = UIAlertAction(title: ALERT_BACK_TO_SETTING,style: UIAlertActionStyle.default, handler: self.back_to_setting)
+                let alert = UIAlertController(title: ALERT_SUCCESS, message: ALERT_THANKS_FOR_SUGGESTION, preferredStyle: UIAlertControllerStyle.Alert)
+                let action_cancel = UIAlertAction(title: ALERT_BACK_TO_SETTING,style: UIAlertActionStyle.Default, handler: self.back_to_setting)
                 alert.addAction(action_cancel)
-                self.present(alert, animated: true, completion: nil)
+                self.presentViewController(alert, animated: true, completion: nil)
                 
                 
                 
             } else {
                 // There was a problem, check error.description
-                self.present(show_alert_one_button(ERROR_ALERT, message: ERROR_SEND_MESSAGE_FAIL, actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
+                self.presentViewController(show_alert_one_button(ERROR_ALERT, message: ERROR_SEND_MESSAGE_FAIL, actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
                 self.recover_button()
             }
         }
     }
     
     //back to setting page
-    func back_to_setting (_ alert: UIAlertAction!) {
-        self.dismiss(animated: true, completion: nil)
+    func back_to_setting (alert: UIAlertAction!) {
+        self.dismissViewControllerAnimated(true, completion: nil)
     }
     
-    @IBAction func back(_ sender: AnyObject) {
+    @IBAction func back(sender: AnyObject) {
        back_to_setting(nil)
     }
 }

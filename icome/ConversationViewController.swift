@@ -22,7 +22,7 @@ class ConversationViewController: RCConversationViewController {
     }
     
     /*Setup the navagation bar*/
-    override func viewWillAppear(_ animated: Bool) {
+    override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         navigationItem.title = nicknameTarget
     }

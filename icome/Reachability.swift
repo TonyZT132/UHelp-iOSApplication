@@ -30,68 +30,68 @@ POSSIBILITY OF SUCH DAMAGE.
 import SystemConfiguration
 import Foundation
 
-public enum ReachabilityError: Error {
-    case failedToCreateWithAddress(sockaddr_in)
-    case failedToCreateWithHostname(String)
-    case unableToSetCallback
-    case unableToSetDispatchQueue
+public enum ReachabilityError: ErrorType {
+    case FailedToCreateWithAddress(sockaddr_in)
+    case FailedToCreateWithHostname(String)
+    case UnableToSetCallback
+    case UnableToSetDispatchQueue
 }
 
 public let ReachabilityChangedNotification = "ReachabilityChangedNotification"
 
-func callback(_ reachability:SCNetworkReachability, flags: SCNetworkReachabilityFlags, info: UnsafeMutableRawPointer) {
-    let reachability = Unmanaged<Reachability>.fromOpaque(OpaquePointer(info)).takeUnretainedValue()
+func callback(reachability:SCNetworkReachability, flags: SCNetworkReachabilityFlags, info: UnsafeMutablePointer<Void>) {
+    let reachability = Unmanaged<Reachability>.fromOpaque(COpaquePointer(info)).takeUnretainedValue()
 
-    DispatchQueue.main.async {
+    dispatch_async(dispatch_get_main_queue()) {
         reachability.reachabilityChanged(flags)
     }
 }
 
 
-open class Reachability: NSObject {
+public class Reachability: NSObject {
 
     public typealias NetworkReachable = (Reachability) -> ()
     public typealias NetworkUnreachable = (Reachability) -> ()
 
     public enum NetworkStatus: CustomStringConvertible {
 
-        case notReachable, reachableViaWiFi, reachableViaWWAN
+        case NotReachable, ReachableViaWiFi, ReachableViaWWAN
 
         public var description: String {
             switch self {
-            case .reachableViaWWAN:
+            case .ReachableViaWWAN:
                 return "Cellular"
-            case .reachableViaWiFi:
+            case .ReachableViaWiFi:
                 return "WiFi"
-            case .notReachable:
+            case .NotReachable:
                 return "No Connection"
             }
         }
     }
 
     // MARK: - *** Public properties ***
-    open var whenReachable: NetworkReachable?
-    open var whenUnreachable: NetworkUnreachable?
-    open var reachableOnWWAN: Bool
-    open var notificationCenter = NotificationCenter.default
+    public var whenReachable: NetworkReachable?
+    public var whenUnreachable: NetworkUnreachable?
+    public var reachableOnWWAN: Bool
+    public var notificationCenter = NSNotificationCenter.defaultCenter()
 
-    open var currentReachabilityStatus: NetworkStatus {
+    public var currentReachabilityStatus: NetworkStatus {
         if isReachable() {
             if isReachableViaWiFi() {
-                return .reachableViaWiFi
+                return .ReachableViaWiFi
             }
             if isRunningOnDevice {
-                return .reachableViaWWAN
+                return .ReachableViaWWAN
             }
         }
-        return .notReachable
+        return .NotReachable
     }
 
-    open var currentReachabilityString: String {
+    public var currentReachabilityString: String {
         return "\(currentReachabilityStatus)"
     }
 
-    fileprivate var previousFlags: SCNetworkReachabilityFlags?
+    private var previousFlags: SCNetworkReachabilityFlags?
     
     // MARK: - *** Initialisation methods ***
     
@@ -102,44 +102,44 @@ open class Reachability: NSObject {
     
     public convenience init(hostname: String) throws {
         
-        let nodename = (hostname as NSString).utf8String
-        guard let ref = SCNetworkReachabilityCreateWithName(nil, nodename!) else { throw ReachabilityError.failedToCreateWithHostname(hostname) }
+        let nodename = (hostname as NSString).UTF8String
+        guard let ref = SCNetworkReachabilityCreateWithName(nil, nodename) else { throw ReachabilityError.FailedToCreateWithHostname(hostname) }
 
         self.init(reachabilityRef: ref)
     }
 
-    open class func reachabilityForInternetConnection() throws -> Reachability {
+    public class func reachabilityForInternetConnection() throws -> Reachability {
         
         var zeroAddress = sockaddr_in()
-        zeroAddress.sin_len = UInt8(MemoryLayout.size(ofValue: zeroAddress))
+        zeroAddress.sin_len = UInt8(sizeofValue(zeroAddress))
         zeroAddress.sin_family = sa_family_t(AF_INET)
         
-        guard let ref = withUnsafePointer(to: &zeroAddress, {
+        guard let ref = withUnsafePointer(&zeroAddress, {
             SCNetworkReachabilityCreateWithAddress(nil, UnsafePointer($0))
-        }) else { throw ReachabilityError.failedToCreateWithAddress(zeroAddress) }
+        }) else { throw ReachabilityError.FailedToCreateWithAddress(zeroAddress) }
         
         return Reachability(reachabilityRef: ref)
     }
 
-    open class func reachabilityForLocalWiFi() throws -> Reachability {
+    public class func reachabilityForLocalWiFi() throws -> Reachability {
 
         var localWifiAddress: sockaddr_in = sockaddr_in(sin_len: __uint8_t(0), sin_family: sa_family_t(0), sin_port: in_port_t(0), sin_addr: in_addr(s_addr: 0), sin_zero: (0, 0, 0, 0, 0, 0, 0, 0))
-        localWifiAddress.sin_len = UInt8(MemoryLayout.size(ofValue: localWifiAddress))
+        localWifiAddress.sin_len = UInt8(sizeofValue(localWifiAddress))
         localWifiAddress.sin_family = sa_family_t(AF_INET)
 
         // IN_LINKLOCALNETNUM is defined in <netinet/in.h> as 169.254.0.0
         let address: UInt32 = 0xA9FE0000
         localWifiAddress.sin_addr.s_addr = in_addr_t(address.bigEndian)
 
-        guard let ref = withUnsafePointer(to: &localWifiAddress, {
+        guard let ref = withUnsafePointer(&localWifiAddress, {
             SCNetworkReachabilityCreateWithAddress(nil, UnsafePointer($0))
-        }) else { throw ReachabilityError.failedToCreateWithAddress(localWifiAddress) }
+        }) else { throw ReachabilityError.FailedToCreateWithAddress(localWifiAddress) }
         
         return Reachability(reachabilityRef: ref)
     }
 
     // MARK: - *** Notifier methods ***
-    open func startNotifier() throws {
+    public func startNotifier() throws {
 
         guard !notifierRunning else { return }
         
@@ -148,16 +148,16 @@ open class Reachability: NSObject {
         
         if !SCNetworkReachabilitySetCallback(reachabilityRef!, callback, &context) {
             stopNotifier()
-            throw ReachabilityError.unableToSetCallback
+            throw ReachabilityError.UnableToSetCallback
         }
 
         if !SCNetworkReachabilitySetDispatchQueue(reachabilityRef!, reachabilitySerialQueue) {
             stopNotifier()
-            throw ReachabilityError.unableToSetDispatchQueue
+            throw ReachabilityError.UnableToSetDispatchQueue
         }
 
         // Perform an intial check
-        reachabilitySerialQueue.async { () -> Void in
+        dispatch_async(reachabilitySerialQueue) { () -> Void in
             let flags = self.reachabilityFlags
             self.reachabilityChanged(flags)
         }
@@ -165,7 +165,7 @@ open class Reachability: NSObject {
         notifierRunning = true
     }
 
-    open func stopNotifier() {
+    public func stopNotifier() {
         defer { notifierRunning = false }
         guard let reachabilityRef = reachabilityRef else { return }
 
@@ -174,12 +174,12 @@ open class Reachability: NSObject {
     }
     
     // MARK: - *** Connection test methods ***
-    open func isReachable() -> Bool {
+    public func isReachable() -> Bool {
         let flags = reachabilityFlags
         return isReachableWithFlags(flags)
     }
 
-    open func isReachableViaWWAN() -> Bool {
+    public func isReachableViaWWAN() -> Bool {
         
         let flags = reachabilityFlags
         
@@ -187,7 +187,7 @@ open class Reachability: NSObject {
         return isRunningOnDevice && isReachable(flags) && isOnWWAN(flags)
     }
 
-    open func isReachableViaWiFi() -> Bool {
+    public func isReachableViaWiFi() -> Bool {
         
         let flags = reachabilityFlags
         
@@ -206,7 +206,7 @@ open class Reachability: NSObject {
     }
 
     // MARK: - *** Private methods ***
-    fileprivate var isRunningOnDevice: Bool = {
+    private var isRunningOnDevice: Bool = {
         #if (arch(i386) || arch(x86_64)) && os(iOS)
             return false
         #else
@@ -214,11 +214,11 @@ open class Reachability: NSObject {
         #endif
     }()
 
-    fileprivate var notifierRunning = false
-    fileprivate var reachabilityRef: SCNetworkReachability?
-    fileprivate let reachabilitySerialQueue = DispatchQueue(label: "uk.co.ashleymills.reachability", attributes: [])
+    private var notifierRunning = false
+    private var reachabilityRef: SCNetworkReachability?
+    private let reachabilitySerialQueue = dispatch_queue_create("uk.co.ashleymills.reachability", DISPATCH_QUEUE_SERIAL)
 
-    fileprivate func reachabilityChanged(_ flags: SCNetworkReachabilityFlags) {
+    private func reachabilityChanged(flags: SCNetworkReachabilityFlags) {
         
         guard previousFlags != flags else { return }
         
@@ -232,12 +232,12 @@ open class Reachability: NSObject {
             }
         }
 
-        notificationCenter.post(name: Notification.Name(rawValue: ReachabilityChangedNotification), object:self)
+        notificationCenter.postNotificationName(ReachabilityChangedNotification, object:self)
 
         previousFlags = flags
     }
 
-    fileprivate func isReachableWithFlags(_ flags: SCNetworkReachabilityFlags) -> Bool {
+    private func isReachableWithFlags(flags: SCNetworkReachabilityFlags) -> Bool {
 
         if !isReachable(flags) {
             return false
@@ -259,72 +259,72 @@ open class Reachability: NSObject {
     
     // WWAN may be available, but not active until a connection has been established.
     // WiFi may require a connection for VPN on Demand.
-    fileprivate func isConnectionRequired() -> Bool {
+    private func isConnectionRequired() -> Bool {
         return connectionRequired()
     }
 
-    fileprivate func connectionRequired() -> Bool {
+    private func connectionRequired() -> Bool {
         let flags = reachabilityFlags
         return isConnectionRequired(flags)
     }
 
     // Dynamic, on demand connection?
-    fileprivate func isConnectionOnDemand() -> Bool {
+    private func isConnectionOnDemand() -> Bool {
         let flags = reachabilityFlags
         return isConnectionRequired(flags) && isConnectionOnTrafficOrDemand(flags)
     }
 
     // Is user intervention required?
-    fileprivate func isInterventionRequired() -> Bool {
+    private func isInterventionRequired() -> Bool {
         let flags = reachabilityFlags
         return isConnectionRequired(flags) && isInterventionRequired(flags)
     }
 
-    fileprivate func isOnWWAN(_ flags: SCNetworkReachabilityFlags) -> Bool {
+    private func isOnWWAN(flags: SCNetworkReachabilityFlags) -> Bool {
         #if os(iOS)
-            return flags.contains(.isWWAN)
+            return flags.contains(.IsWWAN)
         #else
             return false
         #endif
     }
-    fileprivate func isReachable(_ flags: SCNetworkReachabilityFlags) -> Bool {
-        return flags.contains(.reachable)
+    private func isReachable(flags: SCNetworkReachabilityFlags) -> Bool {
+        return flags.contains(.Reachable)
     }
-    fileprivate func isConnectionRequired(_ flags: SCNetworkReachabilityFlags) -> Bool {
-        return flags.contains(.connectionRequired)
+    private func isConnectionRequired(flags: SCNetworkReachabilityFlags) -> Bool {
+        return flags.contains(.ConnectionRequired)
     }
-    fileprivate func isInterventionRequired(_ flags: SCNetworkReachabilityFlags) -> Bool {
-        return flags.contains(.interventionRequired)
+    private func isInterventionRequired(flags: SCNetworkReachabilityFlags) -> Bool {
+        return flags.contains(.InterventionRequired)
     }
-    fileprivate func isConnectionOnTraffic(_ flags: SCNetworkReachabilityFlags) -> Bool {
-        return flags.contains(.connectionOnTraffic)
+    private func isConnectionOnTraffic(flags: SCNetworkReachabilityFlags) -> Bool {
+        return flags.contains(.ConnectionOnTraffic)
     }
-    fileprivate func isConnectionOnDemand(_ flags: SCNetworkReachabilityFlags) -> Bool {
-        return flags.contains(.connectionOnDemand)
+    private func isConnectionOnDemand(flags: SCNetworkReachabilityFlags) -> Bool {
+        return flags.contains(.ConnectionOnDemand)
     }
-    func isConnectionOnTrafficOrDemand(_ flags: SCNetworkReachabilityFlags) -> Bool {
-        return !flags.intersection([.connectionOnTraffic, .connectionOnDemand]).isEmpty
+    func isConnectionOnTrafficOrDemand(flags: SCNetworkReachabilityFlags) -> Bool {
+        return !flags.intersect([.ConnectionOnTraffic, .ConnectionOnDemand]).isEmpty
     }
-    fileprivate func isTransientConnection(_ flags: SCNetworkReachabilityFlags) -> Bool {
-        return flags.contains(.transientConnection)
+    private func isTransientConnection(flags: SCNetworkReachabilityFlags) -> Bool {
+        return flags.contains(.TransientConnection)
     }
-    fileprivate func isLocalAddress(_ flags: SCNetworkReachabilityFlags) -> Bool {
-        return flags.contains(.isLocalAddress)
+    private func isLocalAddress(flags: SCNetworkReachabilityFlags) -> Bool {
+        return flags.contains(.IsLocalAddress)
     }
-    fileprivate func isDirect(_ flags: SCNetworkReachabilityFlags) -> Bool {
-        return flags.contains(.isDirect)
+    private func isDirect(flags: SCNetworkReachabilityFlags) -> Bool {
+        return flags.contains(.IsDirect)
     }
-    fileprivate func isConnectionRequiredOrTransient(_ flags: SCNetworkReachabilityFlags) -> Bool {
-        let testcase:SCNetworkReachabilityFlags = [.connectionRequired, .transientConnection]
-        return flags.intersection(testcase) == testcase
+    private func isConnectionRequiredOrTransient(flags: SCNetworkReachabilityFlags) -> Bool {
+        let testcase:SCNetworkReachabilityFlags = [.ConnectionRequired, .TransientConnection]
+        return flags.intersect(testcase) == testcase
     }
 
-    fileprivate var reachabilityFlags: SCNetworkReachabilityFlags {
+    private var reachabilityFlags: SCNetworkReachabilityFlags {
         
         guard let reachabilityRef = reachabilityRef else { return SCNetworkReachabilityFlags() }
         
         var flags = SCNetworkReachabilityFlags()
-        let gotFlags = withUnsafeMutablePointer(to: &flags) {
+        let gotFlags = withUnsafeMutablePointer(&flags) {
             SCNetworkReachabilityGetFlags(reachabilityRef, UnsafeMutablePointer($0))
         }
         
@@ -335,7 +335,7 @@ open class Reachability: NSObject {
         }
     }
 
-    override open var description: String {
+    override public var description: String {
 
         var W: String
         if isRunningOnDevice {

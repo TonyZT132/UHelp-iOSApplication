@@ -19,7 +19,7 @@ class SlideViewController: UIViewController, UIPageViewControllerDataSource, UIP
         imageArr = arrInit()
         
         /*Initialize the page controller*/
-        self.pageViewController = self.storyboard?.instantiateViewController(withIdentifier: "pagecontroll") as! UIPageViewController
+        self.pageViewController = self.storyboard?.instantiateViewControllerWithIdentifier("pagecontroll") as! UIPageViewController
         self.pageViewController.dataSource = self
         self.pageViewController.delegate = self
         
@@ -27,11 +27,11 @@ class SlideViewController: UIViewController, UIPageViewControllerDataSource, UIP
         let start = self.viewControllerAtIndex(0)
         let viewControllers = NSArray (object: start)
         
-        self.pageViewController.setViewControllers(viewControllers as? [UIViewController], direction: .forward, animated: true, completion: nil)
-        self.pageViewController.view.frame = CGRect(x: 0,y: 0, width: self.view.frame.width, height: self.view.frame.height)
+        self.pageViewController.setViewControllers(viewControllers as? [UIViewController], direction: .Forward, animated: true, completion: nil)
+        self.pageViewController.view.frame = CGRectMake(0,0, self.view.frame.width, self.view.frame.height)
         self.addChildViewController(self.pageViewController)
         self.view.addSubview(self.pageViewController.view)
-        self.pageViewController.didMove(toParentViewController: self)
+        self.pageViewController.didMoveToParentViewController(self)
     }
 
     override func didReceiveMemoryWarning() {
@@ -53,13 +53,13 @@ class SlideViewController: UIViewController, UIPageViewControllerDataSource, UIP
     }
     
     /*Sliding listener*/
-    func viewControllerAtIndex (_ index:Int) -> ContentViewController
+    func viewControllerAtIndex (index:Int) -> ContentViewController
     {
         if((self.imageArr.count == 0) || (index >= self.imageArr.count)){
             return ContentViewController()
         }
         
-        let vc : ContentViewController = self.storyboard?.instantiateViewController(withIdentifier: "content") as! ContentViewController
+        let vc : ContentViewController = self.storyboard?.instantiateViewControllerWithIdentifier("content") as! ContentViewController
         
         vc.imageName = self.imageArr[index] as! String
         vc.pageIndex = index
@@ -69,7 +69,7 @@ class SlideViewController: UIViewController, UIPageViewControllerDataSource, UIP
     
     //MARK: PageViewController
     
-    func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
+    func pageViewController(pageViewController: UIPageViewController, viewControllerBeforeViewController viewController: UIViewController) -> UIViewController? {
         
         let vc = viewController as! ContentViewController
         var index = vc.pageIndex as Int
@@ -82,7 +82,7 @@ class SlideViewController: UIViewController, UIPageViewControllerDataSource, UIP
         return self.viewControllerAtIndex(index)
     }
     
-    func pageViewController(_ pageViewController: UIPageViewController, viewControllerAfter viewController: UIViewController) -> UIViewController? {
+    func pageViewController(pageViewController: UIPageViewController, viewControllerAfterViewController viewController: UIViewController) -> UIViewController? {
         let vc = viewController as! ContentViewController
         var index = vc.pageIndex as Int
         
@@ -99,11 +99,11 @@ class SlideViewController: UIViewController, UIPageViewControllerDataSource, UIP
         return self.viewControllerAtIndex(index)
     }
     
-    func presentationCount(for pageViewController: UIPageViewController) -> Int {
+    func presentationCountForPageViewController(pageViewController: UIPageViewController) -> Int {
         return self.imageArr.count
     }
     
-    func presentationIndex(for pageViewController: UIPageViewController) -> Int {
+    func presentationIndexForPageViewController(pageViewController: UIPageViewController) -> Int {
         return 0
     }
 }

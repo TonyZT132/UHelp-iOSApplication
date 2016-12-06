@@ -24,27 +24,27 @@ class PersonalInfoViewController: UIViewController, UITableViewDataSource,UITabl
         TableView.dataSource = self
         
         let appDelegate =
-            UIApplication.shared.delegate as! AppDelegate
+            UIApplication.sharedApplication().delegate as! AppDelegate
         let managedContext = appDelegate.managedObjectContext
-        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "PersonalMessage")
+        let fetchRequest = NSFetchRequest(entityName: "PersonalMessage")
         let sortDescriptor = NSSortDescriptor(key: "date", ascending: false)
         let sortDescriptors = [sortDescriptor]
         fetchRequest.sortDescriptors = sortDescriptors
         do {
-            self.InfoData = try managedContext.fetch(fetchRequest)
+            self.InfoData = try managedContext.executeFetchRequest(fetchRequest)
             if(self.InfoData.count<=0){
-                self.present(show_alert_one_button(ERROR_ALERT, message: "未收到任何信息", actionButton: ERROR_ALERT_ACTION), animated: true, completion:
+                self.presentViewController(show_alert_one_button(ERROR_ALERT, message: "未收到任何信息", actionButton: ERROR_ALERT_ACTION), animated: true, completion:
                     {
-                        self.navigationController?.popViewController(animated: true)
+                        self.navigationController?.popViewControllerAnimated(true)
                 })
             }else{
                 TableView.reloadData()
             }
         } catch let error as NSError {
             NSLog("Could not fetch \(error), \(error.userInfo)")
-            self.present(show_alert_one_button(ERROR_ALERT, message: "读取失败", actionButton: ERROR_ALERT_ACTION), animated: true, completion:
+            self.presentViewController(show_alert_one_button(ERROR_ALERT, message: "读取失败", actionButton: ERROR_ALERT_ACTION), animated: true, completion:
             {
-                self.navigationController?.popViewController(animated: true)
+                self.navigationController?.popViewControllerAnimated(true)
             })
         }
         
@@ -56,24 +56,24 @@ class PersonalInfoViewController: UIViewController, UITableViewDataSource,UITabl
         // Dispose of any resources that can be recreated.
     }
     
-    override func viewWillAppear(_ animated: Bool) {
+    override func viewWillAppear(animated: Bool) {
         self.TableView.reloadData()
     }
     
     
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return InfoData.count
     
     }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "personal_info_cell") as! PersonalInfoTableViewCell
-        cell.selectionStyle = .none
+    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCellWithIdentifier("personal_info_cell") as! PersonalInfoTableViewCell
+        cell.selectionStyle = .None
         
         /*Get FromUser info */
         let PersonalInfoData = self.InfoData[indexPath.row] as! NSManagedObject
         
-        let ReadStatus = PersonalInfoData.value(forKey: "read") as! Bool
+        let ReadStatus = PersonalInfoData.valueForKey("read") as! Bool
         
         if(ReadStatus == false){
             cell.Status.text = "未读"
@@ -82,20 +82,20 @@ class PersonalInfoViewController: UIViewController, UITableViewDataSource,UITabl
             cell.Status.textColor = UIColor(red: 154.0/255.0, green: 151.0/255.0, blue: 151.0/255.0, alpha:1.0)
         }
 
-        let UserID = PersonalInfoData.value(forKey: "from") as! String
+        let UserID = PersonalInfoData.valueForKey("from") as! String
         let query = PFQuery(className:"_User")
         
-        query.getObjectInBackground(withId: UserID) {
+        query.getObjectInBackgroundWithId(UserID) {
             (user_info: PFObject?, error: NSError?) -> Void in
             if error != nil {
                 print(error)
             } else if let user_info = user_info {
                 
-                cell.NickName.text = user_info.object(forKey: "nick_name") as? String
+                cell.NickName.text = user_info.objectForKey("nick_name") as? String
                 
-                let userImageFile = user_info.object(forKey: "featured_image")  as! PFFile
-                userImageFile.getDataInBackground {
-                    (imageData: Data?, error: NSError?) -> Void in
+                let userImageFile = user_info.objectForKey("featured_image")  as! PFFile
+                userImageFile.getDataInBackgroundWithBlock {
+                    (imageData: NSData?, error: NSError?) -> Void in
                     
                     if error == nil {
                         if let imageData = imageData {
@@ -110,27 +110,27 @@ class PersonalInfoViewController: UIViewController, UITableViewDataSource,UITabl
             }
         }
         
-        cell.Content.text = PersonalInfoData.value(forKey: "content") as? String
+        cell.Content.text = PersonalInfoData.valueForKey("content") as? String
         
         /*Load Post Date*/
-        let date = PersonalInfoData.value(forKey: "date") as! Date
+        let date = PersonalInfoData.valueForKey("date") as! NSDate
         
         /*Get Current Date*/
-        let CurrentDate = Date()
+        let CurrentDate = NSDate()
         
         /*Calculate the Different between Current Date and Post Date*/
-        let diffDateComponents = (Calendar.current as NSCalendar).components([NSCalendar.Unit.year, NSCalendar.Unit.month, NSCalendar.Unit.day, NSCalendar.Unit.hour, NSCalendar.Unit.minute, NSCalendar.Unit.second], from: date, to: CurrentDate, options: NSCalendar.Options.init(rawValue: 0))
+        let diffDateComponents = NSCalendar.currentCalendar().components([NSCalendarUnit.Year, NSCalendarUnit.Month, NSCalendarUnit.Day, NSCalendarUnit.Hour, NSCalendarUnit.Minute, NSCalendarUnit.Second], fromDate: date, toDate: CurrentDate, options: NSCalendarOptions.init(rawValue: 0))
         
         if(diffDateComponents.year != 0 || diffDateComponents.month != 0 || diffDateComponents.day != 0){
-            let dateFormatter = DateFormatter()
+            let dateFormatter = NSDateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd"
-            let strDate = dateFormatter.string(from: date)
+            let strDate = dateFormatter.stringFromDate(date)
             cell.Date.text = strDate
         }else{
             if(diffDateComponents.hour != 0 ){
-                cell.Date.text = String(describing: diffDateComponents.hour) + "小时前"
+                cell.Date.text = String(diffDateComponents.hour) + "小时前"
             }else if (diffDateComponents.minute != 0){
-                cell.Date.text = String(describing: diffDateComponents.minute) + "分钟前"
+                cell.Date.text = String(diffDateComponents.minute) + "分钟前"
             }else{
                 cell.Date.text = "刚刚"
             }
@@ -140,15 +140,15 @@ class PersonalInfoViewController: UIViewController, UITableViewDataSource,UITabl
     }
     
     
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         
         let PersonalInfoData = self.InfoData[indexPath.row] as! NSManagedObject
         PersonalInfoData.setValue(true, forKey: "read")
         do{
-            let detail : DetailViewController = self.storyboard?.instantiateViewController(withIdentifier: "detail") as! DetailViewController
-            detail.objectId_detail = PersonalInfoData.value(forKey: "link") as! String
+            let detail : DetailViewController = self.storyboard?.instantiateViewControllerWithIdentifier("detail") as! DetailViewController
+            detail.objectId_detail = PersonalInfoData.valueForKey("link") as! String
             detail.hidesBottomBarWhenPushed = true
-            self.navigationController!.navigationBar.tintColor = UIColor.white
+            self.navigationController!.navigationBar.tintColor = UIColor.whiteColor()
             try PersonalInfoData.managedObjectContext?.save()
             self.navigationController?.pushViewController(detail, animated: true)
         }catch let error as NSError {
@@ -218,25 +218,25 @@ class PersonalInfoViewController: UIViewController, UITableViewDataSource,UITabl
     }
     
     
-    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+    func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
         /*Leave it blank*/
     }
     
-    func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
-        let deleteAction  = UITableViewRowAction(style: .default, title: "删除", handler: { (action: UITableViewRowAction!, indexPath: IndexPath!) -> Void in
+    func tableView(tableView: UITableView, editActionsForRowAtIndexPath indexPath: NSIndexPath) -> [UITableViewRowAction]? {
+        let deleteAction  = UITableViewRowAction(style: .Default, title: "删除", handler: { (action: UITableViewRowAction!, indexPath: NSIndexPath!) -> Void in
             
-            self.InfoData.remove(at: indexPath.row)
+            self.InfoData.removeAtIndex(indexPath.row)
             
             /*Update coreData*/
             //self.UpdatePersonalInfo()
             
             let appDelegate =
-                UIApplication.shared.delegate as! AppDelegate
+                UIApplication.sharedApplication().delegate as! AppDelegate
             let managedContext = appDelegate.managedObjectContext
-            let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "PersonalMessage")
+            let fetchRequest = NSFetchRequest(entityName: "PersonalMessage")
             do {
-                let messageArr = try managedContext.fetch(fetchRequest)
-                managedContext.delete(messageArr[indexPath.row] as! NSManagedObject)
+                let messageArr = try managedContext.executeFetchRequest(fetchRequest)
+                managedContext.deleteObject(messageArr[indexPath.row] as! NSManagedObject)
                 do {
                     try managedContext.save()
                     
@@ -265,7 +265,7 @@ class PersonalInfoViewController: UIViewController, UITableViewDataSource,UITabl
             
             
             
-            tableView.deleteRows(at: [indexPath], with: .fade)
+            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
         })
         
         return [deleteAction]

@@ -16,7 +16,7 @@ class FullImageViewController: UIViewController, UIScrollViewDelegate {
     @IBOutlet weak var imageScroll: UIScrollView!
     var imageFile: PFFile!
     
-    var timer: Timer? = nil
+    var timer: NSTimer? = nil
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -32,14 +32,14 @@ class FullImageViewController: UIViewController, UIScrollViewDelegate {
         }
     }
     
-    override func viewWillAppear(_ animated: Bool) {
+    override func viewWillAppear(animated: Bool) {
         //Loading Bar
-        SVProgressHUD.show(withStatus: "载入中")
+        SVProgressHUD.showWithStatus("载入中")
     }
     
     func load_image(){
-        imageFile.getDataInBackground {
-            (imageData: Data?, error: NSError?) -> Void in
+        imageFile.getDataInBackgroundWithBlock {
+            (imageData: NSData?, error: NSError?) -> Void in
             if error == nil {
                 if let imageData = imageData {
                     self.full_size_image.image = UIImage(data: imageData)
@@ -58,7 +58,7 @@ class FullImageViewController: UIViewController, UIScrollViewDelegate {
         // Dispose of any resources that can be recreated.
     }
     
-    func viewForZooming(in scrollView: UIScrollView) -> UIView? {
+    func viewForZoomingInScrollView(scrollView: UIScrollView) -> UIView? {
         return self.full_size_image
     }
 }

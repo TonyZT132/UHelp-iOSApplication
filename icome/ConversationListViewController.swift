@@ -17,9 +17,9 @@ class ConversationListViewController: RCConversationListViewController, RCIMUser
         super.viewDidLoad()
         
         /*Remove notification badge number*/
-        UIApplication.shared.applicationIconBadgeNumber = 0
+        UIApplication.sharedApplication().applicationIconBadgeNumber = 0
         
-        RCIM.shared().userInfoDataSource = self
+        RCIM.sharedRCIM().userInfoDataSource = self
         
         /*Set up list of conversation type*/
         self.setDisplayConversationTypes([
@@ -36,14 +36,14 @@ class ConversationListViewController: RCConversationListViewController, RCIMUser
     }
     
     /*Set up the navigation bar*/
-    override func viewWillAppear(_ animated: Bool) {
+    override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         navigationItem.title = "消息"
-        self.emptyConversationView = UIView.init(frame: CGRect(x: 0, y: 0, width: self.view.bounds.size.width, height: self.view.bounds.size.height))
+        self.emptyConversationView = UIView.init(frame: CGRectMake(0, 0, self.view.bounds.size.width, self.view.bounds.size.height))
     }
     
     /*Triggered when user touch table cell*/
-    override func onSelectedTableRow(_ conversationModelType: RCConversationModelType, conversationModel model: RCConversationModel!, at indexPath: IndexPath!) {
+    override func onSelectedTableRow(conversationModelType: RCConversationModelType, conversationModel model: RCConversationModel!, atIndexPath indexPath: NSIndexPath!) {
         let conVC = RCConversationViewController()
         conVC.targetId = model.targetId
         conVC.userName = model.conversationTitle
@@ -52,29 +52,29 @@ class ConversationListViewController: RCConversationListViewController, RCIMUser
         conVC.setMessageAvatarStyle(RCUserAvatarStyle.USER_AVATAR_CYCLE)
         conVC.hidesBottomBarWhenPushed = true
         
-        self.navigationController!.navigationBar.tintColor = UIColor.white
+        self.navigationController!.navigationBar.tintColor = UIColor.whiteColor()
         self.navigationController?.pushViewController(conVC, animated: true)
     }
     
     /*Get user info*/
-    func getUserInfo(withUserId userId: String!, completion: ((RCUserInfo?) -> Void)!) {
+    func getUserInfoWithUserId(userId: String!, completion: ((RCUserInfo!) -> Void)!) {
         let userInfo = RCUserInfo()
         userInfo.userId = userId
         userInfo.name = "友帮用户"
 
         let loadAllData:PFQuery = PFQuery(className: "_User")
         loadAllData.whereKey("username", equalTo:userId)
-        loadAllData.findObjectsInBackground {
+        loadAllData.findObjectsInBackgroundWithBlock {
             (objects: [PFObject]?, error: NSError?) -> Void in
             if error == nil {
                 let temp = NSMutableArray()
                 
                 /*find user info in Parse*/
                 for obj:AnyObject in objects!{
-                    temp.add(obj)
+                    temp.addObject(obj)
                 }
-                userInfo.name = temp.firstObject!.object(forKey: "nick_name") as? String
-                let image_file = temp.firstObject!.object(forKey: "featured_image") as? PFFile
+                userInfo.name = temp.firstObject!.objectForKey("nick_name") as? String
+                let image_file = temp.firstObject!.objectForKey("featured_image") as? PFFile
                 userInfo.portraitUri = image_file?.url
                 self.refreshConversationTableViewIfNeeded()
                 completion(userInfo)

@@ -17,7 +17,7 @@ class SingleConversationNavViewController: UINavigationController {
         // Do any additional setup after loading the view.
     }
     
-    override func viewWillAppear(_ animated: Bool) {
+    override func viewWillAppear(animated: Bool) {
 
     }
 

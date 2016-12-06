@@ -10,22 +10,22 @@ import Foundation
 import Parse
 import CoreData
 
-func CheckMessage(_ User:PFUser!, completion:@escaping (_ count:Int, _ Error:String?) -> Void){
+func CheckMessage(User:PFUser!, completion:(count:Int, Error:String?) -> Void){
     /*Query from Parse class*/
     let query = PFQuery(className:"personal_info_table")
     query.whereKey("TargetId", equalTo: (User.objectId)!)
-    query.findObjectsInBackground {
+    query.findObjectsInBackgroundWithBlock {
         (objects: [PFObject]?, error: NSError?) -> Void in
         if(error == nil){
             let temp = NSMutableArray()
             //var MessageCount = 0
             for obj:AnyObject in objects!{
-                temp.add(obj)
+                temp.addObject(obj)
             }
             
             var Data = [NSDictionary]()
-            if(temp.count > 0 && temp.firstObject?.object(forKey: "personal_info") != nil){
-                Data = temp.firstObject?.object(forKey: "personal_info") as! Array
+            if(temp.count > 0 && temp.firstObject?.objectForKey("personal_info") != nil){
+                Data = temp.firstObject?.objectForKey("personal_info") as! Array
             }
             
             if(Data.count > 0){
@@ -37,17 +37,17 @@ func CheckMessage(_ User:PFUser!, completion:@escaping (_ count:Int, _ Error:Str
                 
                 /*Query from Parse class*/
                 let query = PFQuery(className:"personal_info_table")
-                query.whereKey("TargetId", equalTo: (PFUser.current()?.objectId)!)
-                query.findObjectsInBackground {
+                query.whereKey("TargetId", equalTo: (PFUser.currentUser()?.objectId)!)
+                query.findObjectsInBackgroundWithBlock {
                     (objects: [PFObject]?, error: NSError?) -> Void in
                     
                     if(error == nil){
                         let temp = NSMutableArray()
                         for obj:AnyObject in objects!{
-                            temp.add(obj)
+                            temp.addObject(obj)
                         }
                         if(temp.count > 0){
-                            query.getObjectInBackground(withId: (temp.firstObject!.objectId)!!){
+                            query.getObjectInBackgroundWithId((temp.firstObject!.objectId)!!){
                                 (record: PFObject?, error: NSError?) -> Void in
                                 
                                 if error != nil {
@@ -59,7 +59,7 @@ func CheckMessage(_ User:PFUser!, completion:@escaping (_ count:Int, _ Error:Str
                                     
                                     /*Reset after finishing store data in local*/
                                     record["personal_info"] = []
-                                    record.saveInBackground(block: { (success, error) in
+                                    record.saveInBackgroundWithBlock({ (success, error) in
                                         if error == nil{
                                             
                                             /*Success*/
@@ -97,17 +97,17 @@ func CheckMessage(_ User:PFUser!, completion:@escaping (_ count:Int, _ Error:Str
 }
 
 /*Receive message from server and store in local database*/
-func StoreMessage(_ Data:NSDictionary) {
+func StoreMessage(Data:NSDictionary) {
     
-    let context = (UIApplication.shared.delegate as! AppDelegate).managedObjectContext
-    let row = NSEntityDescription.insertNewObject(forEntityName: "PersonalMessage", into: context)
+    let context = (UIApplication.sharedApplication().delegate as! AppDelegate).managedObjectContext
+    let row = NSEntityDescription.insertNewObjectForEntityForName("PersonalMessage", inManagedObjectContext: context)
     
-    row.setValue(Data.value(forKey: "Link"), forKey: "link")
-    row.setValue(Data.value(forKey: "Target"), forKey: "user")
-    row.setValue(Data.value(forKey: "From"), forKey: "from")
-    row.setValue(Data.value(forKey: "Date"), forKey: "date")
-    row.setValue(Data.value(forKey: "Content"), forKey: "content")
-    row.setValue((Data.value(forKey: "Read") as! Bool), forKey: "read")
+    row.setValue(Data.valueForKey("Link"), forKey: "link")
+    row.setValue(Data.valueForKey("Target"), forKey: "user")
+    row.setValue(Data.valueForKey("From"), forKey: "from")
+    row.setValue(Data.valueForKey("Date"), forKey: "date")
+    row.setValue(Data.valueForKey("Content"), forKey: "content")
+    row.setValue((Data.valueForKey("Read") as! Bool), forKey: "read")
     
     do {
         try context.save()
@@ -118,15 +118,15 @@ func StoreMessage(_ Data:NSDictionary) {
 
 func CountUnreadMessage() -> Int {
     let appDelegate =
-        UIApplication.shared.delegate as! AppDelegate
+        UIApplication.sharedApplication().delegate as! AppDelegate
     let managedContext = appDelegate.managedObjectContext
-    let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "PersonalMessage")
+    let fetchRequest = NSFetchRequest(entityName: "PersonalMessage")
     do {
-        let messageArr = try managedContext.fetch(fetchRequest)
+        let messageArr = try managedContext.executeFetchRequest(fetchRequest)
         var count = 0
         if(messageArr.isEmpty == false){
             for message in messageArr {
-                let isRead = (message as AnyObject).value(forKey: "read") as! Bool
+                let isRead = message.valueForKey("read") as! Bool
                 if(isRead == false){
                     count = count + 1
                 }
@@ -142,13 +142,13 @@ func CountUnreadMessage() -> Int {
 /*Use During Login and Logout*/
 func CleanUpLocalData(){
     let appDelegate =
-        UIApplication.shared.delegate as! AppDelegate
+        UIApplication.sharedApplication().delegate as! AppDelegate
     let managedContext = appDelegate.managedObjectContext
-    let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "PersonalMessage")
+    let fetchRequest = NSFetchRequest(entityName: "PersonalMessage")
     do {
-        let messageArr = try managedContext.fetch(fetchRequest)
+        let messageArr = try managedContext.executeFetchRequest(fetchRequest)
         for message in messageArr {
-            managedContext.delete(message as! NSManagedObject)
+            managedContext.deleteObject(message as! NSManagedObject)
             do {
                 try managedContext.save()
             } catch let error as NSError  {

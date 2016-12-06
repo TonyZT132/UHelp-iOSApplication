@@ -24,7 +24,7 @@ class ReportViewController: UIViewController {
         back_button.layer.cornerRadius = back_button.frame.height / 2
         back_button.clipsToBounds = true
 
-        report_content.layer.borderColor = UIColor(red: 63.0/255.0, green: 31.0/255.0, blue: 105.0/255.0, alpha:1.0).cgColor
+        report_content.layer.borderColor = UIColor(red: 63.0/255.0, green: 31.0/255.0, blue: 105.0/255.0, alpha:1.0).CGColor
     }
 
     override func didReceiveMemoryWarning() {
@@ -32,11 +32,11 @@ class ReportViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
-    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+    override func touchesEnded(touches: Set<UITouch>, withEvent event: UIEvent?) {
         report_content.resignFirstResponder()
     }
     
-    override func viewWillAppear(_ animated: Bool) {
+    override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         navigationItem.title = "举报"
     }
@@ -46,13 +46,13 @@ class ReportViewController: UIViewController {
     }
 
     /*Submit the report*/
-    @IBAction func report(_ sender: AnyObject) {
+    @IBAction func report(sender: AnyObject) {
 
-        let report_from = PFUser.current()!.username
+        let report_from = PFUser.currentUser()!.username
         let content = report_content.text
         
-        if(content?.isEmpty == true || content == ""){
-            self.present(show_alert_one_button(ERROR_ALERT, message: ERROR_EMPTY_CONTENT, actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
+        if(content.isEmpty == true || content == ""){
+            self.presentViewController(show_alert_one_button(ERROR_ALERT, message: ERROR_EMPTY_CONTENT, actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
             recover_button()
             return
         }
@@ -61,15 +61,15 @@ class ReportViewController: UIViewController {
         let num = desStr.length
         
         if(num > 500){
-            let alert = UIAlertController(title: ERROR_ALERT, message:"字数过多" , preferredStyle: UIAlertControllerStyle.alert)
-            let action = UIAlertAction(title: ERROR_ALERT_ACTION, style: UIAlertActionStyle.default ,handler: nil )
+            let alert = UIAlertController(title: ERROR_ALERT, message:"字数过多" , preferredStyle: UIAlertControllerStyle.Alert)
+            let action = UIAlertAction(title: ERROR_ALERT_ACTION, style: UIAlertActionStyle.Default ,handler: nil )
             alert.addAction(action)
-            self.present(alert, animated: true, completion: nil)
+            self.presentViewController(alert, animated: true, completion: nil)
             recover_button()
             return
         }
 
-        SVProgressHUD.setDefaultMaskType(SVProgressHUDMaskType.black)
+        SVProgressHUD.setDefaultMaskType(SVProgressHUDMaskType.Black)
         SVProgressHUD.show()
         
         //upload data
@@ -80,36 +80,36 @@ class ReportViewController: UIViewController {
         
         
         //upload to Parse
-        reportPost.saveInBackground {
+        reportPost.saveInBackgroundWithBlock {
             (success: Bool, error: NSError?) -> Void in
             if (success) {
                 reportedUser = ""
                 
-                let alert = UIAlertController(title: ALERT_SUCCESS, message:ALERT_REPORT_RECEIVED , preferredStyle: UIAlertControllerStyle.alert)
-                let action = UIAlertAction(title: ALERT_BACK_TO_MAIN, style: UIAlertActionStyle.default ,handler: self.back_to_home)
+                let alert = UIAlertController(title: ALERT_SUCCESS, message:ALERT_REPORT_RECEIVED , preferredStyle: UIAlertControllerStyle.Alert)
+                let action = UIAlertAction(title: ALERT_BACK_TO_MAIN, style: UIAlertActionStyle.Default ,handler: self.back_to_home)
                 alert.addAction(action)
                 
                 SVProgressHUD.dismiss()
-                self.present(alert, animated: true, completion: nil)
+                self.presentViewController(alert, animated: true, completion: nil)
                 
             } else {
 
-                self.present(show_alert_one_button(ERROR_ALERT, message: ERROR_SEND_MESSAGE_FAIL, actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
+                self.presentViewController(show_alert_one_button(ERROR_ALERT, message: ERROR_SEND_MESSAGE_FAIL, actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
                 self.recover_button()
             }
         }
     }
     
     //back to home page
-    func back_to_home (_ alert: UIAlertAction!) {
+    func back_to_home (alert: UIAlertAction!) {
 
-        self.dismiss(animated: true, completion: nil)
+        self.dismissViewControllerAnimated(true, completion: nil)
     }
     
-    @IBAction func back_to_main(_ sender: AnyObject) {
+    @IBAction func back_to_main(sender: AnyObject) {
         reportedUser = ""
         
-        self.dismiss(animated: true, completion: nil)
+        self.dismissViewControllerAnimated(true, completion: nil)
         
     }
 }

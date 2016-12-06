@@ -16,7 +16,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
 
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
+    func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
     
         // Initialize Parse.
         Parse.enableLocalDatastore()
@@ -24,38 +24,38 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             clientKey: "<Client Key>")
         
         // [Optional] Track statistics around application opens.
-        PFAnalytics.trackAppOpened(launchOptions: launchOptions)
+        PFAnalytics.trackAppOpenedWithLaunchOptions(launchOptions)
         
         /*Initialize RongCloud*/
-        RCIM.shared().initWithAppKey("Rong Cloud App Key")
+        RCIM.sharedRCIM().initWithAppKey("Rong Cloud App Key")
         messageConnect = false
         
         /*Set up Navigation bar*/
         UINavigationBar.appearance().barTintColor = UIColor(red: 248.0/255.0, green: 134.0/255.0, blue: 5.0/255.0, alpha:1.0)
-        UINavigationBar.appearance().tintColor = UIColor.white
-        UINavigationBar.appearance().titleTextAttributes = [NSForegroundColorAttributeName : UIColor.white]
-        UIApplication.shared.isStatusBarHidden = false
+        UINavigationBar.appearance().tintColor = UIColor.whiteColor()
+        UINavigationBar.appearance().titleTextAttributes = [NSForegroundColorAttributeName : UIColor.whiteColor()]
+        UIApplication.sharedApplication().statusBarHidden = false
         self.window?.makeKeyAndVisible()
         
         /*Set up click font*/
         let tabBar = UITabBarItem.appearance()
-        tabBar.setTitleTextAttributes([NSForegroundColorAttributeName:UIColor.darkGray], for: UIControlState())
+        tabBar.setTitleTextAttributes([NSForegroundColorAttributeName:UIColor.darkGrayColor()], forState: UIControlState.Normal)
         
-        tabBar.setTitleTextAttributes([NSForegroundColorAttributeName:UIColor.darkGray], for: UIControlState.highlighted)
+        tabBar.setTitleTextAttributes([NSForegroundColorAttributeName:UIColor.darkGrayColor()], forState: UIControlState.Highlighted)
         
         /*Initalize the welcome page*/
         let pageController = UIPageControl.appearance()
-        pageController.pageIndicatorTintColor = UIColor.lightGray
-        pageController.currentPageIndicatorTintColor = UIColor.black
-        pageController.backgroundColor = UIColor.clear
+        pageController.pageIndicatorTintColor = UIColor.lightGrayColor()
+        pageController.currentPageIndicatorTintColor = UIColor.blackColor()
+        pageController.backgroundColor = UIColor.clearColor()
     
         //得到当前应用的版本号
-        let infoDictionary = Bundle.main.infoDictionary
+        let infoDictionary = NSBundle.mainBundle().infoDictionary
         let currentAppVersion = infoDictionary!["CFBundleShortVersionString"] as! String
         
         //取出之前保存的版本号
-        let userDefaults = UserDefaults.standard
-        let appVersion = userDefaults.string(forKey: "appVersion")
+        let userDefaults = NSUserDefaults.standardUserDefaults()
+        let appVersion = userDefaults.stringForKey("appVersion")
         
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         
@@ -63,11 +63,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if appVersion == nil || appVersion != currentAppVersion {
             // 保存最新的版本号
             userDefaults.setValue(currentAppVersion, forKey: "appVersion")
-            let start = storyboard.instantiateViewController(withIdentifier: "slide") as! SlideViewController
+            let start = storyboard.instantiateViewControllerWithIdentifier("slide") as! SlideViewController
             self.window?.rootViewController = start
             
         }else{
-            if(PFUser.current() != nil){
+            if(PFUser.currentUser() != nil){
                 print("start conecting")
                 get_token()
                 let rootController  = HomeTabViewController()
@@ -80,39 +80,39 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     /*Resgister remote push notification*/
-    func application(_ application: UIApplication, didRegister notificationSettings: UIUserNotificationSettings) {
+    func application(application: UIApplication, didRegisterUserNotificationSettings notificationSettings: UIUserNotificationSettings) {
         application.registerForRemoteNotifications()
     }
     
-    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+    func application(application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: NSData) {
         
-        let characterSet: CharacterSet = CharacterSet( charactersIn: "<>" )
+        let characterSet: NSCharacterSet = NSCharacterSet( charactersInString: "<>" )
         let deviceTokenString: String = ( deviceToken.description as NSString )
-            .trimmingCharacters( in: characterSet )
-            .replacingOccurrences( of: " ", with: "" ) as String
+            .stringByTrimmingCharactersInSet( characterSet )
+            .stringByReplacingOccurrencesOfString( " ", withString: "" ) as String
         
-        RCIMClient.shared().setDeviceToken(deviceTokenString)
+        RCIMClient.sharedRCIMClient().setDeviceToken(deviceTokenString)
     }
 
-    func applicationWillResignActive(_ application: UIApplication) {
+    func applicationWillResignActive(application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
         // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
     }
 
-    func applicationDidEnterBackground(_ application: UIApplication) {
+    func applicationDidEnterBackground(application: UIApplication) {
         // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
         // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
     }
 
-    func applicationWillEnterForeground(_ application: UIApplication) {
+    func applicationWillEnterForeground(application: UIApplication) {
         // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
     }
 
-    func applicationDidBecomeActive(_ application: UIApplication) {
+    func applicationDidBecomeActive(application: UIApplication) {
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
     }
 
-    func applicationWillTerminate(_ application: UIApplication) {
+    func applicationWillTerminate(application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
         // Saves changes in the application's managed object context before the application terminates.
         self.saveContext()
@@ -120,31 +120,31 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     // MARK: - Core Data stack
 
-    lazy var applicationDocumentsDirectory: URL = {
+    lazy var applicationDocumentsDirectory: NSURL = {
         // The directory the application uses to store the Core Data store file. This code uses a directory named "com.icome" in the application's documents Application Support directory.
-        let urls = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+        let urls = NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask)
         return urls[urls.count-1]
     }()
 
     lazy var managedObjectModel: NSManagedObjectModel = {
         // The managed object model for the application. This property is not optional. It is a fatal error for the application not to be able to find and load its model.
-        let modelURL = Bundle.main.url(forResource: "icome", withExtension: "momd")!
-        return NSManagedObjectModel(contentsOf: modelURL)!
+        let modelURL = NSBundle.mainBundle().URLForResource("icome", withExtension: "momd")!
+        return NSManagedObjectModel(contentsOfURL: modelURL)!
     }()
 
     lazy var persistentStoreCoordinator: NSPersistentStoreCoordinator = {
         // The persistent store coordinator for the application. This implementation creates and returns a coordinator, having added the store for the application to it. This property is optional since there are legitimate error conditions that could cause the creation of the store to fail.
         // Create the coordinator and store
         let coordinator = NSPersistentStoreCoordinator(managedObjectModel: self.managedObjectModel)
-        let url = self.applicationDocumentsDirectory.appendingPathComponent("SingleViewCoreData.sqlite")
+        let url = self.applicationDocumentsDirectory.URLByAppendingPathComponent("SingleViewCoreData.sqlite")
         var failureReason = "There was an error creating or loading the application's saved data."
         do {
-            try coordinator.addPersistentStore(ofType: NSSQLiteStoreType, configurationName: nil, at: url, options: nil)
+            try coordinator.addPersistentStoreWithType(NSSQLiteStoreType, configuration: nil, URL: url, options: nil)
         } catch {
             // Report any error we got.
             var dict = [String: AnyObject]()
-            dict[NSLocalizedDescriptionKey] = "Failed to initialize the application's saved data" as AnyObject?
-            dict[NSLocalizedFailureReasonErrorKey] = failureReason as AnyObject?
+            dict[NSLocalizedDescriptionKey] = "Failed to initialize the application's saved data"
+            dict[NSLocalizedFailureReasonErrorKey] = failureReason
 
             dict[NSUnderlyingErrorKey] = error as NSError
             let wrappedError = NSError(domain: "YOUR_ERROR_DOMAIN", code: 9999, userInfo: dict)
@@ -160,7 +160,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     lazy var managedObjectContext: NSManagedObjectContext = {
         // Returns the managed object context for the application (which is already bound to the persistent store coordinator for the application.) This property is optional since there are legitimate error conditions that could cause the creation of the context to fail.
         let coordinator = self.persistentStoreCoordinator
-        var managedObjectContext = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
+        var managedObjectContext = NSManagedObjectContext(concurrencyType: .MainQueueConcurrencyType)
         managedObjectContext.persistentStoreCoordinator = coordinator
         return managedObjectContext
     }()
@@ -183,16 +183,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     /*Request Token for RongCloud*/
     func get_token () {
-        let username = (PFUser.current()?.username)! as String
-        let nick_name = PFUser.current()!.object(forKey: "nick_name") as! String
-        let userImageFile = PFUser.current()!.object(forKey: "featured_image")  as! PFFile
+        let username = (PFUser.currentUser()?.username)! as String
+        let nick_name = PFUser.currentUser()!.objectForKey("nick_name") as! String
+        let userImageFile = PFUser.currentUser()!.objectForKey("featured_image")  as! PFFile
         
         let parameters = [
             "userId": "\(username)",
             "name": "\(nick_name)",
             "portraitUri": "\(userImageFile.url)"
         ]
-        let Timestamp = String(format: "%.0f",Date().timeIntervalSince1970)
+        let Timestamp = String(format: "%.0f",NSDate().timeIntervalSince1970)
         let Nonce: String = String(arc4random())
         let appSec = "udeJt1XKi3"
         
@@ -202,17 +202,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let url = "https://api.cn.ronghub.com/user/getToken.json"
         let request = NSMutableURLRequest()
         request.timeoutInterval = 6
-        request.httpMethod = "POST"
+        request.HTTPMethod = "POST"
         manage.requestSerializer.setValue("<app key>", forHTTPHeaderField: "App-Key")
         manage.requestSerializer.setValue(Nonce, forHTTPHeaderField: "Nonce")
         manage.requestSerializer.setValue(Timestamp, forHTTPHeaderField: "Timestamp")
         manage.requestSerializer.setValue(sha1, forHTTPHeaderField: "Signature")
         manage.requestSerializer.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
-        manage.post(url, parameters: parameters, success: { (operation, data) -> Void in
-            token = (data as AnyObject).object(forKey: "token") as! String
+        manage.POST(url, parameters: parameters, success: { (operation, data) -> Void in
+            token = data.objectForKey("token") as! String
             /*Set up RongCloud connection*/
-            RCIM.shared().connect(withToken: token, success: { (str:String!) -> Void in
-                DispatchQueue.main.async(execute: {
+            RCIM.sharedRCIM().connectWithToken(token, success: { (str:String!) -> Void in
+                dispatch_async(dispatch_get_main_queue(),{
                     messageConnect = true
                     SVProgressHUD.dismiss()
                 });

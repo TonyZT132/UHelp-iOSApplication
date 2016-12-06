@@ -16,7 +16,7 @@ class EditInfoTableViewController: UITableViewController {
     @IBOutlet weak var UserName: UILabel!
     @IBOutlet weak var selected_birthday_button: UIButton!
     
-    var selected_birthday:Date!
+    var selected_birthday:NSDate!
     var birthday_string:String?
     var isBirthdaySelected = false
     var username:String?
@@ -29,9 +29,9 @@ class EditInfoTableViewController: UITableViewController {
         Gender.text = usergender!
         UserName.text = username!
         
-        selected_birthday_button.contentHorizontalAlignment = UIControlContentHorizontalAlignment.right
-        selected_birthday_button.setTitleColor(UIColor(red: 248.0/255.0, green: 143.0/255.0, blue: 51.0/255.0, alpha:1.0), for: UIControlState())
-        self.selected_birthday_button.setTitle(birthday_string, for: UIControlState())
+        selected_birthday_button.contentHorizontalAlignment = UIControlContentHorizontalAlignment.Right
+        selected_birthday_button.setTitleColor(UIColor(red: 248.0/255.0, green: 143.0/255.0, blue: 51.0/255.0, alpha:1.0), forState: UIControlState.Normal)
+        self.selected_birthday_button.setTitle(birthday_string, forState: .Normal)
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(EditInfoTableViewController.hideKeyboard))
         tapGesture.cancelsTouchesInView = true
@@ -56,12 +56,12 @@ class EditInfoTableViewController: UITableViewController {
 
     // MARK: - Table view data source
 
-    override func numberOfSections(in tableView: UITableView) -> Int {
+    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         // #warning Incomplete implementation, return the number of sections
         return 2
     }
 
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
         switch section {
             case 0: return 2
@@ -70,60 +70,60 @@ class EditInfoTableViewController: UITableViewController {
         }
     }
 
-    @IBAction func SelectBirthday(_ sender: AnyObject) {
+    @IBAction func SelectBirthday(sender: AnyObject) {
         
-        let datePicker = ActionSheetDatePicker(title: "请选择出生日期:", datePickerMode: UIDatePickerMode.date, selectedDate: Date(), doneBlock: {
+        let datePicker = ActionSheetDatePicker(title: "请选择出生日期:", datePickerMode: UIDatePickerMode.Date, selectedDate: NSDate(), doneBlock: {
             picker, value, index in
             
             self.isBirthdaySelected = true
-            self.selected_birthday = value as! Date
-            let dateFormatter = DateFormatter()
+            self.selected_birthday = value as! NSDate
+            let dateFormatter = NSDateFormatter()
             dateFormatter.dateFormat = "yyyy年MM月dd日"
-            let strDate = dateFormatter.string(from: self.selected_birthday)
+            let strDate = dateFormatter.stringFromDate(self.selected_birthday)
             self.birthday_string = strDate
-            self.selected_birthday_button.setTitle(self.birthday_string, for: UIControlState())
+            self.selected_birthday_button.setTitle(self.birthday_string, forState: .Normal)
             return
-            }, cancel: { ActionStringCancelBlock in return }, origin: sender.superview!!.superview)
+            }, cancelBlock: { ActionStringCancelBlock in return }, origin: sender.superview!!.superview)
         
         
-        let currentDate: Date = Date()
+        let currentDate: NSDate = NSDate()
         
         
-        var calendar: Calendar = Calendar(identifier: Calendar.Identifier.gregorian)
+        let calendar: NSCalendar = NSCalendar(calendarIdentifier: NSCalendarIdentifierGregorian)!
         // let calendar: NSCalendar = NSCalendar.currentCalendar()
-        calendar.timeZone = TimeZone(identifier: "UTC")!
+        calendar.timeZone = NSTimeZone(name: "UTC")!
         
-        var components: DateComponents = DateComponents()
-        (components as NSDateComponents).calendar = calendar
+        let components: NSDateComponents = NSDateComponents()
+        components.calendar = calendar
         
         components.year = -100
-        let minDate: Date = (calendar as NSCalendar).date(byAdding: components, to: currentDate, options: NSCalendar.Options(rawValue: 0))!
+        let minDate: NSDate = calendar.dateByAddingComponents(components, toDate: currentDate, options: NSCalendarOptions(rawValue: 0))!
         
         components.year = +0
-        let maxDate: Date = (calendar as NSCalendar).date(byAdding: components, to: currentDate, options: NSCalendar.Options(rawValue: 0))!
+        let maxDate: NSDate = calendar.dateByAddingComponents(components, toDate: currentDate, options: NSCalendarOptions(rawValue: 0))!
         
-        datePicker?.maximumDate = maxDate
-        datePicker?.minimumDate = minDate
-        datePicker?.show()
+        datePicker.maximumDate = maxDate
+        datePicker.minimumDate = minDate
+        datePicker.showActionSheetPicker()
         
     }
     
-    @IBAction func Update(_ sender: AnyObject) {
+    @IBAction func Update(sender: AnyObject) {
         hideKeyboard()
         if(isBirthdaySelected == true){
             /*Set up the loading screen*/
-            SVProgressHUD.setDefaultMaskType(SVProgressHUDMaskType.black)
+            SVProgressHUD.setDefaultMaskType(SVProgressHUDMaskType.Black)
             SVProgressHUD.show()
             
             /*Do update*/
-            if let currentUser = PFUser.current(){
+            if let currentUser = PFUser.currentUser(){
                 currentUser["birthday"] = birthday_string
                 currentUser["birthday_data"] = selected_birthday
                 currentUser["age"] = age_calc(selected_birthday)
-                currentUser.saveInBackground(block: { (success, error) -> Void in
+                currentUser.saveInBackgroundWithBlock({ (success, error) -> Void in
                     if(error == nil){
                         SVProgressHUD.dismiss()
-                        self.navigationController?.popViewController(animated: true)
+                        self.navigationController?.popViewControllerAnimated(true)
                     }else{
                         NSLog("更新失败")
                         SVProgressHUD.dismiss()
@@ -132,12 +132,12 @@ class EditInfoTableViewController: UITableViewController {
                 })
                 
             }else{
-                self.present(show_alert_one_button(ERROR_ALERT, message: "更新失败", actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
+                self.presentViewController(show_alert_one_button(ERROR_ALERT, message: "更新失败", actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
             }
 
             
         }else{
-            self.present(show_alert_one_button("提示", message: "未更改任何资料", actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
+            self.presentViewController(show_alert_one_button("提示", message: "未更改任何资料", actionButton: ERROR_ALERT_ACTION), animated: true, completion: nil)
         }
     }
     /*

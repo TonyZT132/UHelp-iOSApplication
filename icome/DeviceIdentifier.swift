@@ -16,7 +16,7 @@ public extension UIDevice {
         uname(&systemInfo)
         let machineMirror = Mirror(reflecting: systemInfo.machine)
         let identifier = machineMirror.children.reduce("") { identifier, element in
-            guard let value = element.value as? Int8, value != 0 else { return identifier }
+            guard let value = element.value as? Int8 where value != 0 else { return identifier }
             return identifier + String(UnicodeScalar(UInt8(value)))
         }
         
@@ -51,7 +51,7 @@ public extension UIDevice {
 }
 
 func device() -> Int {
-    let modelName = UIDevice.current.modelName
+    let modelName = UIDevice.currentDevice().modelName
     
     switch modelName {
         case "iPhone 4","iPhone 4s":
