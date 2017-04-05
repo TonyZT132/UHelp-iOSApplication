@@ -10,15 +10,15 @@ This application establishes a platform for individual person who has unique ski
 
 Technology
 ---
-####Programming Languages
+#### Programming Languages
 * Application: Swift, Objective-C
 * Server: Node.js, PHP
 
-####Databases
+#### Databases
 * Local: SQLite
 * Remote: MongoDB 
 
-####Cloud Platforms
+#### Cloud Platforms
 * Parse
 * MongoLab
 * Twilio
@@ -29,23 +29,23 @@ Technology
 
 Screenshots
 ---
-####Starting Page
+#### Starting Page
 <img src="http://i.imgur.com/F7anxTa.png" width="300">
 
-####Login Page
+#### Login Page
 <img src="http://i.imgur.com/vvvmi1O.png" width="300">
 
-####Home Page
+#### Home Page
 <img src="http://i.imgur.com/noBQpCj.png" width="300">
 
-####Detail Page
+#### Detail Page
 <img src="http://i.imgur.com/43DuAQ5.png" width="300">
 
-####Chatting Page
+#### Chatting Page
 <img src="http://i.imgur.com/mD43RRR.png" width="300">
 
-####Setting Page
+#### Setting Page
 <img src="http://i.imgur.com/1OeRg4s.png" width="300">
 
-####Profile Page
+#### Profile Page
 <img src="http://i.imgur.com/Ij2fjFl.png" width="300">
