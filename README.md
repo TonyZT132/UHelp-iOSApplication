@@ -2,7 +2,7 @@
 
 Author
 ---
-* Tony Zhang (tuo.zhang@mail.utoronto.ca)
+* Tony Zhang (tuo.zhang.t@gmail.com)
 
 Description
 ---
